@@ -1,0 +1,26 @@
+{
+  "score_ranges": {
+    "rule_score": [
+      0.0,
+      0.4166666666666667
+    ],
+    "if_score": [
+      0.0,
+      0.9999999960095584
+    ],
+    "ae_score": [
+      0.0,
+      1.0
+    ]
+  },
+  "tier_thresholds": {
+    "TIER_1": 0.2604,
+    "TIER_2": 0.1637,
+    "TIER_3": 0.1026
+  },
+  "weights": {
+    "rule_score": 0.33,
+    "if_score": 0.33,
+    "ae_score": 0.34
+  }
+}

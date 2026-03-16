@@ -1,0 +1,2628 @@
+
+  ── RANK #1 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1050
+  Time     : 2025-06-02 01:45:27
+  Amount   : $3398.02
+  City     : Birmingham
+  Device   : Samsung Galaxy S10
+  Txn Type : transfer
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.645  |  TIER: TIER_1  |  MODEL AGREEMENT: 2/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ⬜ Rule Engine       score=0.000
+    ✅ Isolation Forest  score=0.944
+    ✅ Autoencoder       score=0.980
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → nan
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    late_night_x_zscore_7D                 -0.22172  ↓ normal
+    new_device_new_city_x_amt              -0.20132  ↓ normal
+    user_amt_ratio_vs_mean_1D              -0.20036  ↓ normal
+    late_night_x_new_city                  -0.17797  ↓ normal
+    user_amt_ratio_vs_max_7D               -0.17605  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    user_amt_ratio_vs_max_30D              8399.73200  [HIGH]
+    user_amt_ratio_vs_mean_30D             8190.09300  [HIGH]
+    user_amt_ratio_vs_median_30D           7918.03170  [HIGH]
+    user_amt_ratio_vs_mean_7D              7362.23630  [HIGH]
+    user_amt_max_30D                       367.03076  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 20.56
+    User 7D avg amount                  : 20.56
+    Amount z-score (30D)                : 2.34
+    Amount z-score (7D)                 : 2.34
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 1.00
+    New city for user                   : Yes
+    New device for user                 : Yes
+    Cold-start user                     : Yes
+    Impossible travel flag              : No
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 165.27
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #2 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1033
+  Time     : 2025-06-06 00:12:45
+  Amount   : $3005.65
+  City     : Leeds
+  Device   : Huawei P30
+  Txn Type : transfer
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.622  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.417
+    ✅ Isolation Forest  score=0.882
+    ✅ Autoencoder       score=0.004
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → New city 'Leeds' but only 14.9 minutes since last transaction
+    → First transaction in city 'Leeds', amount z-score=2.60 (>2.0)
+    → First use of device 'Huawei P30', amount z-score=2.60 (>2.0)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    late_night_x_zscore_7D                 -0.22766  ↓ normal
+    impossible_travel                      -0.21038  ↓ normal
+    late_night_x_new_city                  -0.19518  ↓ normal
+    velocity_ratio_1h_vs_30D_baseline      -0.18895  ↓ normal
+    new_device_new_city_x_amt              -0.18578  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    velocity_ratio_1h_vs_30D_baseline      14.81817  [HIGH]
+    impossible_travel                      14.47585  [HIGH]
+    new_city_x_zscore_30D                  12.15726  [HIGH]
+    is_first_txn_of_day                    7.92608  [HIGH]
+    is_burst_30min                         6.80395  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 907.39
+    User 7D avg amount                  : 907.39
+    Amount z-score (30D)                : 2.60
+    Amount z-score (7D)                 : 2.60
+    Txns in past 1h                     : 1.00
+    Txns in past 30D                    : 4.00
+    New city for user                   : Yes
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : Yes
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 5.28
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #3 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1075
+  Time     : 2025-06-01 23:34:03
+  Amount   : $3296.25
+  City     : Leeds
+  Device   : Huawei P30
+  Txn Type : withdrawal
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.617  |  TIER: TIER_1  |  MODEL AGREEMENT: 2/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ⬜ Rule Engine       score=0.000
+    ✅ Isolation Forest  score=0.839
+    ✅ Autoencoder       score=1.000
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → nan
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    amt_ratio_from_prev                    -0.21455  ↓ normal
+    user_amt_ratio_vs_mean_1D              -0.20263  ↓ normal
+    user_amt_max_15D                       -0.19028  ↓ normal
+    user_device_is_first_occurrence        -0.17864  ↓ normal
+    user_amt_ratio_vs_max_7D               -0.17388  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    user_amt_ratio_vs_max_30D              8570.64500  [HIGH]
+    user_amt_ratio_vs_mean_30D             8355.20400  [HIGH]
+    user_amt_ratio_vs_median_30D           8100.74170  [HIGH]
+    user_amt_ratio_vs_mean_7D              7522.54500  [HIGH]
+    user_amt_max_30D                       350.51273  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 20.54
+    User 7D avg amount                  : 20.54
+    Amount z-score (30D)                : 2.27
+    Amount z-score (7D)                 : 2.27
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 1.00
+    New city for user                   : No
+    New device for user                 : Yes
+    Cold-start user                     : Yes
+    Impossible travel flag              : No
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 160.48
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #4 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1094
+  Time     : 2025-06-06 05:18:59
+  Amount   : €4802.57
+  City     : Leeds
+  Device   : Nokia 3310
+  Txn Type : withdrawal
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.600  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.417
+    ✅ Isolation Forest  score=0.808
+    ✅ Autoencoder       score=0.009
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → New city 'Leeds' but only 4.5 minutes since last transaction
+    → First transaction in city 'Leeds', amount z-score=2.41 (>2.0)
+    → First use of device 'Nokia 3310', amount z-score=2.41 (>2.0)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    amount_above_p95                       -0.23385  ↓ normal
+    new_device_new_city_x_amt              -0.23298  ↓ normal
+    new_device_x_amt_zscore                -0.21804  ↓ normal
+    is_burst_5min                          -0.20372  ↓ normal
+    impossible_travel                      -0.19890  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    impossible_travel                      130.55684  [HIGH]
+    velocity_ratio_1h_vs_30D_baseline      30.73363  [HIGH]
+    new_device_x_amt_zscore                17.32458  [HIGH]
+    impossible_travel_x_amt                15.14265  [HIGH]
+    user_velocity_5min                     12.18220  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 2704.12
+    User 7D avg amount                  : 2704.12
+    Amount z-score (30D)                : 2.41
+    Amount z-score (7D)                 : 2.41
+    Txns in past 1h                     : 1.00
+    Txns in past 30D                    : 6.00
+    New city for user                   : Yes
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : Yes
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 2.36
+    Burst (<5min gap)                   : Yes
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #5 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1027
+  Time     : 2025-06-02 08:00:40
+  Amount   : £2312.4
+  City     : Manchester
+  Device   : Huawei P30
+  Txn Type : withdrawal
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.578  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.375
+    ✅ Isolation Forest  score=0.848
+    ✅ Autoencoder       score=0.003
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → Amount z-score=4.73 exceeds threshold 3 (user 30D mean=656, amount=2312)
+    → First transaction in city 'Manchester', amount z-score=4.73 (>2.0)
+    → First use of device 'Huawei P30', amount z-score=4.73 (>2.0)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    user_amt_std_15D                       -0.22476  ↓ normal
+    new_device_new_city_x_amt              -0.19437  ↓ normal
+    user_amt_ratio_vs_mean_7D              -0.17131  ↓ normal
+    new_city_x_new_device                  -0.16885  ↓ normal
+    user_device_is_first_occurrence        -0.16592  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    new_city_x_zscore_30D                  50.25931  [HIGH]
+    user_missing_rate_hist                 12.40130  [HIGH]
+    user_amt_max_30D                       8.21958  [HIGH]
+    user_amt_std_30D                       7.17568  [HIGH]
+    new_city_x_amt_zscore                  5.78428  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 655.88
+    User 7D avg amount                  : 655.88
+    Amount z-score (30D)                : 4.73
+    Amount z-score (7D)                 : 4.73
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 3.00
+    New city for user                   : Yes
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : No
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 9.18
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #6 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1043
+  Time     : 2025-06-04 07:21:59
+  Amount   : $4213.12
+  City     : Glasgow
+  Device   : UNKNOWN
+  Txn Type : withdrawal
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.523  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.292
+    ✅ Isolation Forest  score=0.881
+    ✅ Autoencoder       score=0.005
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → New city 'Glasgow' but only 22.7 minutes since last transaction
+    → First transaction in city 'Glasgow', amount z-score=2.44 (>2.0)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    new_device_new_city_x_amt              -0.22459  ↓ normal
+    new_device_x_amt_zscore                -0.20584  ↓ normal
+    user_device_is_first_occurrence        -0.17571  ↓ normal
+    new_city_x_new_device                  -0.16722  ↓ normal
+    impossible_travel                      -0.16679  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    impossible_travel                      38.84389  [HIGH]
+    velocity_ratio_1h_vs_30D_baseline      33.80406  [HIGH]
+    is_burst_30min                         18.15745  [HIGH]
+    new_device_x_amt_zscore                17.32693  [HIGH]
+    new_city_x_zscore_30D                  9.16853  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1304.74
+    User 7D avg amount                  : 1304.74
+    Amount z-score (30D)                : 2.44
+    Amount z-score (7D)                 : 2.44
+    Txns in past 1h                     : 1.00
+    Txns in past 30D                    : 5.00
+    New city for user                   : Yes
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : Yes
+    Missing metadata fields             : 1.00
+    Amount ratio vs prev txn            : 9.32
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #7 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1044
+  Time     : 2025-06-09 03:44:41
+  Amount   : UNKNOWN2819.47
+  City     : Glasgow
+  Device   : Xiaomi Mi 11
+  Txn Type : refund
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.511  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.375
+    ✅ Isolation Forest  score=0.648
+    ✅ Autoencoder       score=0.002
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → Amount z-score=3.70 exceeds threshold 3 (user 30D mean=1592, amount=2819)
+    → First transaction in city 'Glasgow', amount z-score=3.70 (>2.0)
+    → First use of device 'Xiaomi Mi 11', amount z-score=3.70 (>2.0)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    late_night_x_zscore_7D                 -0.28493  ↓ normal
+    user_amt_std_15D                       -0.21848  ↓ normal
+    new_device_new_city_x_amt              -0.21071  ↓ normal
+    late_night_x_new_city                  -0.19574  ↓ normal
+    user_txntype_is_first_occurrence       -0.16765  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    new_city_x_zscore_30D                  32.80460  [HIGH]
+    user_amt_std_30D                       4.70232  [HIGH]
+    is_new_device                          4.03816  [HIGH]
+    is_late_night                          3.90323  [HIGH]
+    amt_above_user_p95                     2.24508  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1591.52
+    User 7D avg amount                  : 1633.72
+    Amount z-score (30D)                : 3.70
+    Amount z-score (7D)                 : 2.59
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 3.00
+    New city for user                   : Yes
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : No
+    Missing metadata fields             : 1.00
+    Amount ratio vs prev txn            : 2.15
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #8 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1017
+  Time     : 2025-06-03 19:43:01
+  Amount   : €4768.0
+  City     : UNKNOWN
+  Device   : UNKNOWN
+  Txn Type : deposit
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.498  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.208
+    ✅ Isolation Forest  score=1.000
+    ✅ Autoencoder       score=0.010
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → Amount z-score=10.00 exceeds threshold 3 (user 30D mean=1255, amount=4768)
+    → Both city and device metadata are UNKNOWN (total missing fields: 2)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    amount_above_p95                       -0.25657  ↓ normal
+    new_device_new_city_x_amt              -0.22561  ↓ normal
+    new_device_x_amt_zscore                -0.22507  ↓ normal
+    user_amt_ratio_vs_mean_7D              -0.15471  ↓ normal
+    user_amt_std_15D                       -0.15151  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    new_city_x_zscore_30D                  162.87773  [HIGH]
+    amount_above_p99                       27.05331  [HIGH]
+    user_amt_zscore_30D                    15.57045  [HIGH]
+    is_cold_start                          10.94226  [HIGH]
+    user_amt_ratio_vs_max_30D              10.42524  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1254.60
+    User 7D avg amount                  : 1254.60
+    Amount z-score (30D)                : 10.00
+    Amount z-score (7D)                 : 10.00
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 3.00
+    New city for user                   : Yes
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : No
+    Missing metadata fields             : 2.00
+    Amount ratio vs prev txn            : 3.84
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #9 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1010
+  Time     : 2025-06-05 21:34:14
+  Amount   : £4423.04
+  City     : Glasgow
+  Device   : Huawei P30
+  Txn Type : withdrawal
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.490  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.375
+    ✅ Isolation Forest  score=0.584
+    ✅ Autoencoder       score=0.001
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → Amount z-score=3.52 exceeds threshold 3 (user 30D mean=1748, amount=4423)
+    → First transaction in city 'Glasgow', amount z-score=3.52 (>2.0)
+    → First use of device 'Huawei P30', amount z-score=3.52 (>2.0)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    new_device_x_amt_zscore                -0.29502  ↓ normal
+    new_device_new_city_x_amt              -0.24777  ↓ normal
+    user_device_is_first_occurrence        -0.19781  ↓ normal
+    new_device_and_new_city                -0.19170  ↓ normal
+    new_city_x_new_device                  -0.17674  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    new_city_x_zscore_30D                  12.88821  [HIGH]
+    user_amt_std_30D                       4.89584  [HIGH]
+    amount_above_p95                       4.33659  [HIGH]
+    amt_ratio_vs_user_p95                  3.94195  [HIGH]
+    new_device_x_amt_zscore                3.62650  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1747.76
+    User 7D avg amount                  : 1747.76
+    Amount z-score (30D)                : 3.52
+    Amount z-score (7D)                 : 3.52
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 5.00
+    New city for user                   : Yes
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : No
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 1.69
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #10 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1091
+  Time     : 2025-06-09 04:28:48
+  Amount   : £4542.5
+  City     : Leeds
+  Device   : Samsung Galaxy S10
+  Txn Type : refund
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.419  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.250
+    ✅ Isolation Forest  score=0.667
+    ✅ Autoencoder       score=0.003
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → First transaction in city 'Leeds', amount z-score=2.06 (>2.0)
+    → First use of device 'Samsung Galaxy S10', amount z-score=2.06 (>2.0)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    new_device_x_amt_zscore                -0.28434  ↓ normal
+    new_device_new_city_x_amt              -0.26047  ↓ normal
+    late_night_x_zscore_7D                 -0.22757  ↓ normal
+    late_night_x_new_city                  -0.19961  ↓ normal
+    new_device_and_new_city                -0.16425  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    new_device_x_amt_zscore                34.62426  [HIGH]
+    new_city_x_amt_zscore                  22.82729  [HIGH]
+    is_new_device                          8.00277  [HIGH]
+    new_city_x_zscore_30D                  7.98782  [HIGH]
+    is_late_night                          4.14797  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1823.60
+    User 7D avg amount                  : 1823.60
+    Amount z-score (30D)                : 2.06
+    Amount z-score (7D)                 : 2.06
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 11.00
+    New city for user                   : Yes
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : No
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 1.48
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #11 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1074
+  Time     : 2025-06-03 14:07:54
+  Amount   : $4356.6
+  City     : Leeds
+  Device   : Pixel 6
+  Txn Type : deposit
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.418  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.250
+    ✅ Isolation Forest  score=0.663
+    ✅ Autoencoder       score=0.003
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → Amount z-score=5.92 exceeds threshold 3 (user 30D mean=921, amount=4357)
+    → First use of device 'Pixel 6', amount z-score=5.92 (>2.0)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    new_device_x_amt_zscore                -0.22736  ↓ normal
+    user_device_is_first_occurrence        -0.22171  ↓ normal
+    user_amt_ratio_vs_mean_7D              -0.16865  ↓ normal
+    user_amt_max_15D                       -0.16764  ↓ normal
+    user_amt_ratio_vs_max_7D               -0.14855  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    new_city_x_zscore_30D                  19.56815  [HIGH]
+    user_amt_max_30D                       12.82775  [HIGH]
+    new_city_x_amt_zscore                  10.82249  [HIGH]
+    user_amt_mean_30D                      9.74866  [HIGH]
+    new_device_x_amt_zscore                8.40530  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 921.30
+    User 7D avg amount                  : 921.30
+    Amount z-score (30D)                : 5.92
+    Amount z-score (7D)                 : 5.92
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 4.00
+    New city for user                   : No
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : No
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 2.97
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #12 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1037
+  Time     : 2025-06-08 07:33:53
+  Amount   : UNKNOWN4199.64
+  City     : Manchester
+  Device   : Pixel 6
+  Txn Type : withdrawal
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.413  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.250
+    ✅ Isolation Forest  score=0.648
+    ✅ Autoencoder       score=0.004
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → Amount z-score=4.66 exceeds threshold 3 (user 30D mean=1279, amount=4200)
+    → First transaction in city 'Manchester', amount z-score=4.66 (>2.0)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    user_velocity_6h                       -0.17708  ↓ normal
+    user_amt_ratio_vs_mean_7D              -0.16989  ↓ normal
+    new_city_x_zscore_7D                   -0.16488  ↓ normal
+    amt_ratio_vs_user_p95                  -0.15598  ↓ normal
+    user_device_amt_max_1D                 -0.14981  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    new_city_x_zscore_30D                  82.52698  [HIGH]
+    new_city_x_amt_zscore                  12.62116  [HIGH]
+    user_velocity_6h                       9.92874  [HIGH]
+    amt_ratio_vs_user_p95                  5.47914  [HIGH]
+    amount_above_p95                       4.98080  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1279.45
+    User 7D avg amount                  : 1279.45
+    Amount z-score (30D)                : 4.66
+    Amount z-score (7D)                 : 4.66
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 8.00
+    New city for user                   : Yes
+    New device for user                 : No
+    Cold-start user                     : No
+    Impossible travel flag              : No
+    Missing metadata fields             : 1.00
+    Amount ratio vs prev txn            : 6.16
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #13 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1076
+  Time     : 2025-06-06 18:00:49
+  Amount   : £4452.15
+  City     : UNKNOWN
+  Device   : Nokia 3310
+  Txn Type : refund
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.413  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.250
+    ✅ Isolation Forest  score=0.645
+    ✅ Autoencoder       score=0.006
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → Amount z-score=10.00 exceeds threshold 3 (user 30D mean=961, amount=4452)
+    → First use of device 'Nokia 3310', amount z-score=10.00 (>2.0)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    new_device_x_amt_zscore                -0.26330  ↓ normal
+    user_amt_max_15D                       -0.21741  ↓ normal
+    user_amt_std_15D                       -0.21399  ↓ normal
+    user_device_is_first_occurrence        -0.20752  ↓ normal
+    user_txntype_is_first_occurrence       -0.18843  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    new_city_x_zscore_30D                  62.47062  [HIGH]
+    user_amt_zscore_30D                    27.30082  [HIGH]
+    new_device_x_amt_zscore                21.31422  [HIGH]
+    user_amt_zscore_7D                     17.39040  [HIGH]
+    new_city_x_amt_zscore                  16.80878  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 961.01
+    User 7D avg amount                  : 961.01
+    Amount z-score (30D)                : 10.00
+    Amount z-score (7D)                 : 10.00
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 3.00
+    New city for user                   : No
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : No
+    Missing metadata fields             : 1.00
+    Amount ratio vs prev txn            : 6.43
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #14 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1006
+  Time     : 2025-06-07 17:19:58
+  Amount   : UNKNOWN3323.25
+  City     : Leeds
+  Device   : Xiaomi Mi 11
+  Txn Type : purchase
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.392  |  TIER: TIER_1  |  MODEL AGREEMENT: 2/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.250
+    ✅ Isolation Forest  score=0.587
+    ⬜ Autoencoder       score=0.001
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → First transaction in city 'Leeds', amount z-score=2.67 (>2.0)
+    → First use of device 'Xiaomi Mi 11', amount z-score=2.67 (>2.0)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    new_device_new_city_x_amt              -0.23674  ↓ normal
+    user_device_is_first_occurrence        -0.19494  ↓ normal
+    new_device_and_new_city                -0.18114  ↓ normal
+    new_city_x_new_device                  -0.17036  ↓ normal
+    user_amt_ratio_vs_mean_7D              -0.13861  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    new_city_x_zscore_30D                  13.88830  [HIGH]
+    new_device_x_amt_zscore                6.21439  [HIGH]
+    is_new_device                          5.89989  [HIGH]
+    new_city_x_amt_zscore                  2.92035  [HIGH]
+    is_cold_start                          2.20361  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1264.47
+    User 7D avg amount                  : 1264.47
+    Amount z-score (30D)                : 2.67
+    Amount z-score (7D)                 : 2.67
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 3.00
+    New city for user                   : Yes
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : No
+    Missing metadata fields             : 1.00
+    Amount ratio vs prev txn            : 1.55
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #15 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1012
+  Time     : 2025-06-06 23:21:07
+  Amount   : £4111.75
+  City     : London
+  Device   : Pixel 6
+  Txn Type : transfer
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.388  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.167
+    ✅ Isolation Forest  score=0.771
+    ✅ Autoencoder       score=0.005
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → New city 'London' but only 13.0 minutes since last transaction
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    new_device_new_city_x_amt              -0.24516  ↓ normal
+    impossible_travel                      -0.22798  ↓ normal
+    new_device_x_amt_zscore                -0.20405  ↓ normal
+    is_burst_30min                         -0.19156  ↓ normal
+    new_device_and_new_city                -0.18149  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    impossible_travel                      54.44252  [HIGH]
+    impossible_travel_x_amt                11.16149  [HIGH]
+    user_amt_sum_1h                        10.70631  [HIGH]
+    velocity_ratio_1h_vs_30D_baseline      9.70033  [HIGH]
+    is_burst_30min                         6.94921  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 2069.42
+    User 7D avg amount                  : 2069.42
+    Amount z-score (30D)                : 1.35
+    Amount z-score (7D)                 : 1.35
+    Txns in past 1h                     : 1.00
+    Txns in past 30D                    : 10.00
+    New city for user                   : Yes
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : Yes
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 19.18
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #16 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1006
+  Time     : 2025-06-08 18:37:56
+  Amount   : UNKNOWN4348.3
+  City     : Cardiff
+  Device   : Samsung Galaxy S10
+  Txn Type : refund
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.387  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.250
+    ✅ Isolation Forest  score=0.570
+    ✅ Autoencoder       score=0.002
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → First transaction in city 'Cardiff', amount z-score=2.13 (>2.0)
+    → First use of device 'Samsung Galaxy S10', amount z-score=2.13 (>2.0)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    new_device_new_city_x_amt              -0.24516  ↓ normal
+    new_device_x_amt_zscore                -0.24222  ↓ normal
+    user_device_is_first_occurrence        -0.20942  ↓ normal
+    new_device_and_new_city                -0.18013  ↓ normal
+    new_city_x_zscore_30D                  -0.17619  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    new_device_x_amt_zscore                23.79385  [HIGH]
+    new_city_x_amt_zscore                  13.84837  [HIGH]
+    is_new_device                          5.12553  [HIGH]
+    day_of_week                            3.26578  [HIGH]
+    user_missing_rate_hist                 2.95354  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1779.16
+    User 7D avg amount                  : 1779.16
+    Amount z-score (30D)                : 2.13
+    Amount z-score (7D)                 : 2.13
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 4.00
+    New city for user                   : Yes
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : No
+    Missing metadata fields             : 1.00
+    Amount ratio vs prev txn            : 1.31
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #17 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1020
+  Time     : 2025-06-02 05:20:49
+  Amount   : €187.82
+  City     : Leeds
+  Device   : iPhone 13
+  Txn Type : refund
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.381  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.167
+    ✅ Isolation Forest  score=0.751
+    ✅ Autoencoder       score=0.004
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → New city 'Leeds' but only 18.6 minutes since last transaction
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    velocity_ratio_1h_vs_30D_baseline      -0.24835  ↓ normal
+    is_burst_30min                         -0.20525  ↓ normal
+    user_velocity_30min                    -0.17028  ↓ normal
+    impossible_travel                      -0.16703  ↓ normal
+    user_velocity_1h                       -0.16391  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    impossible_travel_x_amt                73.60864  [HIGH]
+    velocity_ratio_1h_vs_30D_baseline      8.01640  [HIGH]
+    user_amt_sum_1h                        7.32144  [HIGH]
+    user_amt_max_30D                       6.48264  [HIGH]
+    device_changed_from_prev               3.90605  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1344.00
+    User 7D avg amount                  : 1344.00
+    Amount z-score (30D)                : -1.39
+    Amount z-score (7D)                 : -1.39
+    Txns in past 1h                     : 1.00
+    Txns in past 30D                    : 3.00
+    New city for user                   : Yes
+    New device for user                 : No
+    Cold-start user                     : No
+    Impossible travel flag              : Yes
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 0.13
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #18 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1020
+  Time     : 2025-06-02 11:09:34
+  Amount   : €2324.9
+  City     : Cardiff
+  Device   : Huawei P30
+  Txn Type : withdrawal
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.378  |  TIER: TIER_1  |  MODEL AGREEMENT: 2/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.167
+    ✅ Isolation Forest  score=0.745
+    ⬜ Autoencoder       score=0.001
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → New city 'Cardiff' but only 58.1 minutes since last transaction
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    velocity_ratio_1h_vs_30D_baseline      -0.21852  ↓ normal
+    new_device_new_city_x_amt              -0.20133  ↓ normal
+    user_device_is_first_occurrence        -0.19191  ↓ normal
+    impossible_travel                      -0.19004  ↓ normal
+    new_city_x_new_device                  -0.17518  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    amt_above_user_p95                     6.99818  [HIGH]
+    impossible_travel_x_amt                5.59481  [HIGH]
+    is_new_device                          4.15221  [HIGH]
+    impossible_travel                      4.01830  [HIGH]
+    new_city_x_zscore_30D                  3.71173  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1103.54
+    User 7D avg amount                  : 1103.54
+    Amount z-score (30D)                : 1.57
+    Amount z-score (7D)                 : 1.57
+    Txns in past 1h                     : 1.00
+    Txns in past 30D                    : 5.00
+    New city for user                   : Yes
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : Yes
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 1.79
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #19 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1088
+  Time     : 2025-06-14 16:52:46
+  Amount   : £4158.83
+  City     : Birmingham
+  Device   : Pixel 6
+  Txn Type : deposit
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.372  |  TIER: TIER_1  |  MODEL AGREEMENT: 1/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.250
+    ⬜ Isolation Forest  score=0.526
+    ⬜ Autoencoder       score=0.001
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → First transaction in city 'Birmingham', amount z-score=2.26 (>2.0)
+    → First use of device 'Pixel 6', amount z-score=2.26 (>2.0)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    new_device_new_city_x_amt              -0.28380  ↓ normal
+    user_device_is_first_occurrence        -0.24245  ↓ normal
+    new_device_x_amt_zscore                -0.23818  ↓ normal
+    new_city_x_zscore_7D                   -0.17513  ↓ normal
+    new_city_x_new_device                  -0.16859  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    new_device_x_amt_zscore                3.56997  [HIGH]
+    amt_above_user_p95                     3.25187  [HIGH]
+    is_business_hours                      2.61890  [HIGH]
+    user_amt_std_7D                        2.29307  [HIGH]
+    is_cold_start                          2.17169  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1709.85
+    User 7D avg amount                  : 1923.75
+    Amount z-score (30D)                : 2.26
+    Amount z-score (7D)                 : 2.63
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 6.00
+    New city for user                   : Yes
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : No
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 1.32
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #20 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1027
+  Time     : 2025-06-02 09:13:36
+  Amount   : €4136.35
+  City     : Manchester
+  Device   : iPhone 13
+  Txn Type : withdrawal
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.370  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.208
+    ✅ Isolation Forest  score=0.620
+    ✅ Autoencoder       score=0.002
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → Amount z-score=3.50 exceeds threshold 3 (user 30D mean=1070, amount=4136)
+    → First use of device 'iPhone 13', amount z-score=3.50 (>2.0)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    user_device_is_first_occurrence        -0.20334  ↓ normal
+    new_device_x_amt_zscore                -0.18107  ↓ normal
+    user_amt_ratio_vs_mean_7D              -0.15121  ↓ normal
+    user_currency_is_first_occurrence      -0.13494  ↓ normal
+    is_month_start                         -0.13087  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    new_device_x_amt_zscore                17.12810  [HIGH]
+    user_missing_rate_hist                 8.44393  [HIGH]
+    new_city_x_zscore_30D                  5.23448  [HIGH]
+    user_amt_max_30D                       5.05275  [HIGH]
+    user_amt_mean_30D                      4.81816  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1070.01
+    User 7D avg amount                  : 1070.01
+    Amount z-score (30D)                : 3.50
+    Amount z-score (7D)                 : 3.50
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 4.00
+    New city for user                   : No
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : No
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 1.79
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #21 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1044
+  Time     : 2025-06-11 09:51:37
+  Amount   : $3349.2
+  City     : Leeds
+  Device   : iPhone 13
+  Txn Type : refund
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.363  |  TIER: TIER_1  |  MODEL AGREEMENT: 1/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.250
+    ⬜ Isolation Forest  score=0.498
+    ⬜ Autoencoder       score=0.001
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → First transaction in city 'Leeds', amount z-score=2.16 (>2.0)
+    → First use of device 'iPhone 13', amount z-score=2.16 (>2.0)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    new_device_new_city_x_amt              -0.25182  ↓ normal
+    new_city_x_new_device                  -0.19301  ↓ normal
+    new_device_and_new_city                -0.17861  ↓ normal
+    user_device_is_first_occurrence        -0.17573  ↓ normal
+    user_currency_is_first_occurrence      -0.16750  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    new_city_x_zscore_30D                  5.67073  [HIGH]
+    new_device_x_amt_zscore                4.31804  [HIGH]
+    is_cold_start                          3.65301  [HIGH]
+    is_business_hours                      2.82375  [HIGH]
+    new_city_x_amt_zscore                  2.63323  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1898.51
+    User 7D avg amount                  : 2064.88
+    Amount z-score (30D)                : 2.16
+    Amount z-score (7D)                 : 1.20
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 4.00
+    New city for user                   : Yes
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : No
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 1.19
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #22 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1059
+  Time     : 2025-06-03 08:52:55
+  Amount   : €3861.94
+  City     : Liverpool
+  Device   : Huawei P30
+  Txn Type : withdrawal
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.360  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.208
+    ✅ Isolation Forest  score=0.589
+    ✅ Autoencoder       score=0.002
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → Amount z-score=3.47 exceeds threshold 3 (user 30D mean=1291, amount=3862)
+    → First transaction in city 'Liverpool', amount z-score=3.47 (>2.0)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    user_currency_is_first_occurrence      -0.15542  ↓ normal
+    user_amt_ratio_vs_mean_7D              -0.15346  ↓ normal
+    new_city_x_zscore_7D                   -0.14705  ↓ normal
+    user_amt_max_15D                       -0.12708  ↓ normal
+    user_amt_ratio_vs_max_7D               -0.12430  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    new_city_x_zscore_30D                  34.84896  [HIGH]
+    new_city_x_amt_zscore                  9.97987  [HIGH]
+    device_changed_from_prev               4.30080  [HIGH]
+    is_new_city                            2.57967  [HIGH]
+    user_missing_rate_hist                 1.86041  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1290.75
+    User 7D avg amount                  : 1290.75
+    Amount z-score (30D)                : 3.47
+    Amount z-score (7D)                 : 3.47
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 4.00
+    New city for user                   : Yes
+    New device for user                 : No
+    Cold-start user                     : No
+    Impossible travel flag              : No
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 1.99
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #23 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1037
+  Time     : 2025-06-08 05:04:21
+  Amount   : UNKNOWN2504.46
+  City     : London
+  Device   : iPhone 13
+  Txn Type : deposit
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.359  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.208
+    ✅ Isolation Forest  score=0.587
+    ✅ Autoencoder       score=0.002
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → Amount z-score=3.28 exceeds threshold 3 (user 30D mean=1175, amount=2504)
+    → First use of device 'iPhone 13', amount z-score=3.28 (>2.0)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    user_amt_std_15D                       -0.18276  ↓ normal
+    user_device_is_first_occurrence        -0.17507  ↓ normal
+    user_amt_max_15D                       -0.15328  ↓ normal
+    new_device_x_zscore_7D                 -0.13516  ↓ normal
+    amt_ratio_vs_user_p95                  -0.13489  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    user_amt_max_30D                       7.55058  [HIGH]
+    is_new_device                          6.21293  [HIGH]
+    user_amt_std_30D                       5.62053  [HIGH]
+    amt_above_user_p95                     5.56491  [HIGH]
+    amt_ratio_vs_user_p95                  5.38527  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1174.87
+    User 7D avg amount                  : 1174.87
+    Amount z-score (30D)                : 3.28
+    Amount z-score (7D)                 : 3.28
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 6.00
+    New city for user                   : No
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : No
+    Missing metadata fields             : 1.00
+    Amount ratio vs prev txn            : 1.84
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #24 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1065
+  Time     : 2025-06-13 21:29:49
+  Amount   : £4783.5
+  City     : Birmingham
+  Device   : Samsung Galaxy S10
+  Txn Type : transfer
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.354  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.167
+    ✅ Isolation Forest  score=0.664
+    ✅ Autoencoder       score=0.008
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → New city 'Birmingham' but only 5.2 minutes since last transaction
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    new_device_x_amt_zscore                -0.27521  ↓ normal
+    impossible_travel                      -0.24303  ↓ normal
+    amount_above_p95                       -0.23263  ↓ normal
+    new_device_new_city_x_amt              -0.22821  ↓ normal
+    is_burst_30min                         -0.19526  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    impossible_travel                      137.48580  [HIGH]
+    impossible_travel_x_amt                35.68477  [HIGH]
+    new_device_x_amt_zscore                16.38871  [HIGH]
+    is_burst_30min                         8.91356  [HIGH]
+    user_amt_sum_1h                        7.13614  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 3332.24
+    User 7D avg amount                  : 2654.00
+    Amount z-score (30D)                : 0.88
+    Amount z-score (7D)                 : 1.11
+    Txns in past 1h                     : 1.00
+    Txns in past 30D                    : 5.00
+    New city for user                   : Yes
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : Yes
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 10.77
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #25 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1084
+  Time     : 2025-06-08 12:08:28
+  Amount   : €4922.17
+  City     : Birmingham
+  Device   : Pixel 6
+  Txn Type : withdrawal
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.351  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.208
+    ✅ Isolation Forest  score=0.560
+    ✅ Autoencoder       score=0.003
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → Amount z-score=3.30 exceeds threshold 3 (user 30D mean=1839, amount=4922)
+    → First use of device 'Pixel 6', amount z-score=3.30 (>2.0)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    amount_above_p95                       -0.33893  ↓ normal
+    new_device_x_amt_zscore                -0.25119  ↓ normal
+    user_device_is_first_occurrence        -0.21099  ↓ normal
+    amt_above_user_p95                     -0.17044  ↓ normal
+    weekend_x_high_amt                     -0.14827  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    new_device_x_amt_zscore                19.83396  [HIGH]
+    new_city_x_amt_zscore                  18.14838  [HIGH]
+    new_city_x_zscore_30D                  11.03926  [HIGH]
+    user_amt_std_30D                       4.99456  [HIGH]
+    amount_above_p95                       4.95714  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1838.65
+    User 7D avg amount                  : 1838.65
+    Amount z-score (30D)                : 3.30
+    Amount z-score (7D)                 : 3.30
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 4.00
+    New city for user                   : No
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : No
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 1.69
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #26 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1054
+  Time     : 2025-06-02 14:17:38
+  Amount   : £3920.51
+  City     : Liverpool
+  Device   : Huawei P30
+  Txn Type : transfer
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.350  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.208
+    ✅ Isolation Forest  score=0.559
+    ✅ Autoencoder       score=0.002
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → Amount z-score=3.40 exceeds threshold 3 (user 30D mean=1439, amount=3921)
+    → First transaction in city 'Liverpool', amount z-score=3.40 (>2.0)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    user_device_amt_max_1D                 -0.19948  ↓ normal
+    new_city_x_zscore_7D                   -0.17354  ↓ normal
+    user_txntype_is_first_occurrence       -0.16513  ↓ normal
+    new_city_x_zscore_30D                  -0.12961  ↓ normal
+    is_month_start                         -0.12936  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    new_city_x_zscore_30D                  23.11144  [HIGH]
+    user_amt_std_30D                       6.64569  [HIGH]
+    new_device_x_amt_zscore                4.75564  [HIGH]
+    user_missing_rate_hist                 2.83542  [HIGH]
+    user_amt_std_7D                        2.60766  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1439.25
+    User 7D avg amount                  : 1439.25
+    Amount z-score (30D)                : 3.40
+    Amount z-score (7D)                 : 3.40
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 3.00
+    New city for user                   : Yes
+    New device for user                 : No
+    Cold-start user                     : No
+    Impossible travel flag              : No
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 3.44
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #27 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1031
+  Time     : 2025-06-01 23:49:03
+  Amount   : €4613.2
+  City     : UNKNOWN
+  Device   : UNKNOWN
+  Txn Type : withdrawal
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.339  |  TIER: TIER_1  |  MODEL AGREEMENT: 2/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.083
+    ✅ Isolation Forest  score=0.825
+    ⬜ Autoencoder       score=0.001
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → Both city and device metadata are UNKNOWN (total missing fields: 2)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    new_device_x_amt_zscore                -0.26349  ↓ normal
+    user_amt_max_15D                       -0.22751  ↓ normal
+    new_device_and_new_city                -0.18122  ↓ normal
+    new_device_new_city_x_amt              -0.17334  ↓ normal
+    new_city_x_zscore_30D                  -0.17083  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    user_amt_max_30D                       10.68722  [HIGH]
+    user_missing_rate_hist                 6.60810  [HIGH]
+    new_device_x_amt_zscore                3.46215  [HIGH]
+    velocity_ratio_1h_vs_30D_baseline      3.04855  [HIGH]
+    hour_of_day                            2.66947  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1304.24
+    User 7D avg amount                  : 1304.24
+    Amount z-score (30D)                : 2.30
+    Amount z-score (7D)                 : 2.30
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 1.00
+    New city for user                   : Yes
+    New device for user                 : Yes
+    Cold-start user                     : Yes
+    Impossible travel flag              : No
+    Missing metadata fields             : 2.00
+    Amount ratio vs prev txn            : 3.54
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #28 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1007
+  Time     : 2025-06-07 07:09:09
+  Amount   : $2941.77
+  City     : Leeds
+  Device   : Xiaomi Mi 11
+  Txn Type : deposit
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.338  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.167
+    ✅ Isolation Forest  score=0.622
+    ✅ Autoencoder       score=0.003
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → New city 'Leeds' but only 25.8 minutes since last transaction
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    velocity_ratio_1h_vs_30D_baseline      -0.25131  ↓ normal
+    impossible_travel                      -0.22775  ↓ normal
+    user_amt_sum_30min                     -0.20881  ↓ normal
+    new_device_new_city_x_amt              -0.19251  ↓ normal
+    user_device_is_first_occurrence        -0.18661  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    user_amt_std_30D                       6.18346  [HIGH]
+    user_velocity_5min                     5.96489  [HIGH]
+    is_burst_5min                          5.63278  [HIGH]
+    prev2_amount                           4.67685  [HIGH]
+    is_new_device                          4.58467  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 3836.62
+    User 7D avg amount                  : 3836.62
+    Amount z-score (30D)                : -0.55
+    Amount z-score (7D)                 : -0.55
+    Txns in past 1h                     : 1.00
+    Txns in past 30D                    : 3.00
+    New city for user                   : Yes
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : Yes
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 0.60
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #29 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1058
+  Time     : 2025-06-03 02:36:34
+  Amount   : £3001.21
+  City     : Liverpool
+  Device   : UNKNOWN
+  Txn Type : deposit
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.338  |  TIER: TIER_1  |  MODEL AGREEMENT: 2/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.167
+    ✅ Isolation Forest  score=0.622
+    ⬜ Autoencoder       score=0.001
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → New city 'Liverpool' but only 47.8 minutes since last transaction
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    user_velocity_1h                       -0.21580  ↓ normal
+    late_night_x_new_city                  -0.19880  ↓ normal
+    impossible_travel                      -0.16856  ↓ normal
+    impossible_travel_x_amt                -0.16460  ↓ normal
+    user_txntype_amt_min_30D               -0.15372  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    impossible_travel                      14.47968  [HIGH]
+    is_late_night                          3.84407  [HIGH]
+    velocity_ratio_1h_vs_30D_baseline      3.71814  [HIGH]
+    user_device_amt_mean_30D               1.68865  [HIGH]
+    is_both_geo_dev_missing                1.61005  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 2234.89
+    User 7D avg amount                  : 2234.89
+    Amount z-score (30D)                : 0.43
+    Amount z-score (7D)                 : 0.43
+    Txns in past 1h                     : 1.00
+    Txns in past 30D                    : 10.00
+    New city for user                   : Yes
+    New device for user                 : No
+    Cold-start user                     : No
+    Impossible travel flag              : Yes
+    Missing metadata fields             : 1.00
+    Amount ratio vs prev txn            : 1.42
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #30 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1044
+  Time     : 2025-06-23 16:10:21
+  Amount   : $4603.31
+  City     : Manchester
+  Device   : Nokia 3310
+  Txn Type : purchase
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.335  |  TIER: TIER_1  |  MODEL AGREEMENT: 2/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.250
+    ⬜ Isolation Forest  score=0.414
+    ✅ Autoencoder       score=0.002
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → Amount z-score=3.69 exceeds threshold 3 (user 30D mean=1947, amount=4603)
+    → First use of device 'Nokia 3310', amount z-score=3.69 (>2.0)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    new_device_x_amt_zscore                -0.26500  ↓ normal
+    user_device_is_first_occurrence        -0.21781  ↓ normal
+    amt_above_user_p95                     -0.14789  ↓ normal
+    new_device_x_zscore_7D                 -0.14042  ↓ normal
+    amt_ratio_vs_user_p95                  -0.12875  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    new_device_x_amt_zscore                48.00502  [HIGH]
+    is_new_device                          10.15883  [HIGH]
+    time_since_last_same_city_sec          3.09805  [HIGH]
+    amt_ratio_vs_user_p95                  2.60547  [HIGH]
+    new_city_x_zscore_30D                  2.51491  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1946.91
+    User 7D avg amount                  : 2383.80
+    Amount z-score (30D)                : 3.69
+    Amount z-score (7D)                 : 1.54
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 11.00
+    New city for user                   : No
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : No
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 1.93
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #31 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1072
+  Time     : 2025-06-10 04:51:51
+  Amount   : $3240.43
+  City     : UNKNOWN
+  Device   : Samsung Galaxy S10
+  Txn Type : refund
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.333  |  TIER: TIER_1  |  MODEL AGREEMENT: 2/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.125
+    ✅ Isolation Forest  score=0.709
+    ⬜ Autoencoder       score=0.001
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → First use of device 'Samsung Galaxy S10', amount z-score=2.01 (>2.0)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    late_night_x_zscore_7D                 -0.30115  ↓ normal
+    late_night_x_new_city                  -0.22793  ↓ normal
+    new_device_new_city_x_amt              -0.21906  ↓ normal
+    new_device_and_new_city                -0.17265  ↓ normal
+    new_city_x_zscore_7D                   -0.15836  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    is_late_night                          4.25559  [HIGH]
+    user_amt_zscore_7D                     4.05105  [HIGH]
+    is_cold_start                          3.70944  [HIGH]
+    user_amt_std_7D                        3.55958  [HIGH]
+    is_new_device                          3.15583  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1427.67
+    User 7D avg amount                  : 928.95
+    Amount z-score (30D)                : 2.01
+    Amount z-score (7D)                 : 6.12
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 3.00
+    New city for user                   : Yes
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : No
+    Missing metadata fields             : 1.00
+    Amount ratio vs prev txn            : 2.71
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #32 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1099
+  Time     : 2025-06-16 06:14:42
+  Amount   : UNKNOWN4654.78
+  City     : Manchester
+  Device   : Xiaomi Mi 11
+  Txn Type : refund
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.332  |  TIER: TIER_1  |  MODEL AGREEMENT: 2/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.208
+    ⬜ Isolation Forest  score=0.503
+    ✅ Autoencoder       score=0.002
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → Amount z-score=3.03 exceeds threshold 3 (user 30D mean=1740, amount=4655)
+    → First use of device 'Xiaomi Mi 11', amount z-score=3.03 (>2.0)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    new_device_x_amt_zscore                -0.29388  ↓ normal
+    user_device_is_first_occurrence        -0.19709  ↓ normal
+    amt_above_user_p95                     -0.18614  ↓ normal
+    user_amt_ratio_vs_mean_7D              -0.14443  ↓ normal
+    new_device_x_zscore_7D                 -0.14092  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    new_device_x_amt_zscore                43.56634  [HIGH]
+    is_new_device                          8.58737  [HIGH]
+    user_amt_zscore_7D                     8.52003  [HIGH]
+    user_amt_std_7D                        3.68577  [HIGH]
+    new_city_x_zscore_30D                  3.65438  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1740.19
+    User 7D avg amount                  : 1397.17
+    Amount z-score (30D)                : 3.03
+    Amount z-score (7D)                 : 6.21
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 10.00
+    New city for user                   : No
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : No
+    Missing metadata fields             : 1.00
+    Amount ratio vs prev txn            : 3.10
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #33 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1020
+  Time     : 2025-06-02 12:08:29
+  Amount   : €1598.17
+  City     : Glasgow
+  Device   : Xiaomi Mi 11
+  Txn Type : withdrawal
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.332  |  TIER: TIER_1  |  MODEL AGREEMENT: 2/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.167
+    ✅ Isolation Forest  score=0.605
+    ⬜ Autoencoder       score=0.001
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → New city 'Glasgow' but only 58.9 minutes since last transaction
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    user_device_amt_max_1D                 -0.19648  ↓ normal
+    user_velocity_1h                       -0.18006  ↓ normal
+    user_txntype_velocity_1h               -0.17822  ↓ normal
+    impossible_travel                      -0.17668  ↓ normal
+    user_txntype_velocity_6h               -0.15703  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    impossible_travel_x_amt                10.32673  [HIGH]
+    user_amt_max_30D                       3.80569  [HIGH]
+    is_burst_30min                         2.63587  [HIGH]
+    is_burst_5min                          1.21961  [HIGH]
+    is_business_hours                      1.14878  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1307.10
+    User 7D avg amount                  : 1307.10
+    Amount z-score (30D)                : 0.34
+    Amount z-score (7D)                 : 0.34
+    Txns in past 1h                     : 1.00
+    Txns in past 30D                    : 6.00
+    New city for user                   : Yes
+    New device for user                 : No
+    Cold-start user                     : No
+    Impossible travel flag              : Yes
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 0.69
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #34 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1004
+  Time     : 2025-06-13 00:31:40
+  Amount   : $2985.96
+  City     : Glasgow
+  Device   : UNKNOWN
+  Txn Type : purchase
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.331  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.167
+    ✅ Isolation Forest  score=0.601
+    ✅ Autoencoder       score=0.002
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → New city 'Glasgow' but only 16.4 minutes since last transaction
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    new_device_and_new_city                -0.22739  ↓ normal
+    new_device_new_city_x_amt              -0.22235  ↓ normal
+    impossible_travel                      -0.20788  ↓ normal
+    user_velocity_1h                       -0.19102  ↓ normal
+    impossible_travel_x_amt                -0.18884  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    velocity_ratio_1h_vs_30D_baseline      15.79952  [HIGH]
+    impossible_travel                      10.57577  [HIGH]
+    is_burst_30min                         8.76550  [HIGH]
+    is_new_device                          6.67051  [HIGH]
+    impossible_travel_x_amt                2.88797  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 2624.76
+    User 7D avg amount                  : 2624.76
+    Amount z-score (30D)                : 0.28
+    Amount z-score (7D)                 : 0.28
+    Txns in past 1h                     : 1.00
+    Txns in past 30D                    : 8.00
+    New city for user                   : Yes
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : Yes
+    Missing metadata fields             : 1.00
+    Amount ratio vs prev txn            : 2.61
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #35 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1076
+  Time     : 2025-06-15 10:03:26
+  Amount   : £1326.82
+  City     : Cardiff
+  Device   : Nokia 3310
+  Txn Type : transfer
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.327  |  TIER: TIER_1  |  MODEL AGREEMENT: 2/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.167
+    ✅ Isolation Forest  score=0.588
+    ⬜ Autoencoder       score=0.001
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → New city 'Cardiff' but only 9.4 minutes since last transaction
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    is_burst_30min                         -0.21968  ↓ normal
+    user_velocity_30min                    -0.19151  ↓ normal
+    impossible_travel                      -0.18430  ↓ normal
+    user_velocity_1h                       -0.18385  ↓ normal
+    user_amt_sum_30min                     -0.17318  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    impossible_travel_x_amt                11.50866  [HIGH]
+    is_burst_30min                         9.56469  [HIGH]
+    user_device_amt_mean_30D               5.65530  [HIGH]
+    velocity_ratio_1h_vs_30D_baseline      4.66980  [HIGH]
+    is_business_hours                      2.66259  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 2057.30
+    User 7D avg amount                  : 2146.70
+    Amount z-score (30D)                : -0.39
+    Amount z-score (7D)                 : -0.41
+    Txns in past 1h                     : 1.00
+    Txns in past 30D                    : 14.00
+    New city for user                   : Yes
+    New device for user                 : No
+    Cold-start user                     : No
+    Impossible travel flag              : Yes
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 0.29
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #36 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1048
+  Time     : 2025-06-07 17:34:12
+  Amount   : $4686.27
+  City     : Birmingham
+  Device   : Pixel 6
+  Txn Type : deposit
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.325  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.167
+    ✅ Isolation Forest  score=0.582
+    ✅ Autoencoder       score=0.004
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → New city 'Birmingham' but only 13.6 minutes since last transaction
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    user_device_amt_max_1D                 -0.20787  ↓ normal
+    is_burst_30min                         -0.20441  ↓ normal
+    impossible_travel                      -0.17273  ↓ normal
+    user_velocity_6h                       -0.17167  ↓ normal
+    amt_above_user_p95                     -0.16925  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    impossible_travel                      44.94500  [HIGH]
+    velocity_ratio_1h_vs_30D_baseline      23.89600  [HIGH]
+    is_burst_30min                         9.50568  [HIGH]
+    new_device_x_amt_zscore                7.98580  [HIGH]
+    amt_above_user_p95                     6.13699  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 2652.10
+    User 7D avg amount                  : 2652.10
+    Amount z-score (30D)                : 1.63
+    Amount z-score (7D)                 : 1.63
+    Txns in past 1h                     : 1.00
+    Txns in past 30D                    : 18.00
+    New city for user                   : Yes
+    New device for user                 : No
+    Cold-start user                     : No
+    Impossible travel flag              : Yes
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 1.46
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #37 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1089
+  Time     : 2025-06-09 17:08:18
+  Amount   : UNKNOWN2927.47
+  City     : Cardiff
+  Device   : iPhone 13
+  Txn Type : refund
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.322  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.167
+    ✅ Isolation Forest  score=0.570
+    ✅ Autoencoder       score=0.005
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → New city 'Cardiff' but only 1.9 minutes since last transaction
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    is_burst_5min                          -0.24893  ↓ normal
+    user_amt_sum_1h                        -0.22955  ↓ normal
+    user_txntype_velocity_1h               -0.20864  ↓ normal
+    is_burst_30min                         -0.19959  ↓ normal
+    impossible_travel_x_amt                -0.19793  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    user_velocity_5min                     51.18900  [HIGH]
+    is_burst_5min                          48.23865  [HIGH]
+    velocity_ratio_1h_vs_30D_baseline      26.75237  [HIGH]
+    user_amt_sum_1h                        7.35417  [HIGH]
+    user_amt_sum_6h                        3.68652  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 2691.99
+    User 7D avg amount                  : 2604.72
+    Amount z-score (30D)                : 0.17
+    Amount z-score (7D)                 : 0.22
+    Txns in past 1h                     : 1.00
+    Txns in past 30D                    : 17.00
+    New city for user                   : Yes
+    New device for user                 : No
+    Cold-start user                     : No
+    Impossible travel flag              : Yes
+    Missing metadata fields             : 1.00
+    Amount ratio vs prev txn            : 0.70
+    Burst (<5min gap)                   : Yes
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #38 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1027
+  Time     : 2025-06-03 05:32:50
+  Amount   : £4422.18
+  City     : London
+  Device   : Nokia 3310
+  Txn Type : deposit
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.322  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.167
+    ✅ Isolation Forest  score=0.570
+    ✅ Autoencoder       score=0.004
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → New city 'London' but only 51.9 minutes since last transaction
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    impossible_travel                      -0.21589  ↓ normal
+    user_txntype_velocity_1h               -0.17701  ↓ normal
+    user_velocity_1h                       -0.15981  ↓ normal
+    amt_above_user_p95                     -0.15699  ↓ normal
+    impossible_travel_x_amt                -0.14660  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    impossible_travel                      81.63650  [HIGH]
+    impossible_travel_x_amt                7.38769  [HIGH]
+    user_device_amt_mean_30D               4.91784  [HIGH]
+    amt_above_user_p95                     4.05115  [HIGH]
+    lag3_mean_amount                       4.00988  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 2324.08
+    User 7D avg amount                  : 2324.08
+    Amount z-score (30D)                : 1.24
+    Amount z-score (7D)                 : 1.24
+    Txns in past 1h                     : 1.00
+    Txns in past 30D                    : 7.00
+    New city for user                   : Yes
+    New device for user                 : No
+    Cold-start user                     : No
+    Impossible travel flag              : Yes
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 1.09
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #39 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1053
+  Time     : 2025-06-15 15:00:45
+  Amount   : €1469.53
+  City     : Liverpool
+  Device   : Samsung Galaxy S10
+  Txn Type : refund
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.320  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.167
+    ✅ Isolation Forest  score=0.565
+    ✅ Autoencoder       score=0.006
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → New city 'Liverpool' but only 1.4 minutes since last transaction
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    impossible_travel                      -0.28273  ↓ normal
+    is_burst_5min                          -0.23802  ↓ normal
+    velocity_ratio_1h_vs_30D_baseline      -0.20338  ↓ normal
+    is_burst_30min                         -0.19285  ↓ normal
+    user_velocity_30min                    -0.18391  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    user_velocity_5min                     65.55441  [HIGH]
+    is_burst_5min                          62.42833  [HIGH]
+    impossible_travel_x_amt                17.92625  [HIGH]
+    user_amt_std_30D                       9.82838  [HIGH]
+    amt_pct_change_from_prev               5.48841  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 2037.02
+    User 7D avg amount                  : 2037.02
+    Amount z-score (30D)                : -0.25
+    Amount z-score (7D)                 : -0.25
+    Txns in past 1h                     : 1.00
+    Txns in past 30D                    : 4.00
+    New city for user                   : Yes
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : Yes
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 6.09
+    Burst (<5min gap)                   : Yes
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #40 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1048
+  Time     : 2025-06-02 16:35:29
+  Amount   : $3018.65
+  City     : Glasgow
+  Device   : iPhone 13
+  Txn Type : deposit
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.317  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.167
+    ✅ Isolation Forest  score=0.557
+    ✅ Autoencoder       score=0.003
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → New city 'Glasgow' but only 40.2 minutes since last transaction
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    velocity_ratio_1h_vs_30D_baseline      -0.24490  ↓ normal
+    impossible_travel                      -0.20364  ↓ normal
+    user_amt_std_15D                       -0.18951  ↓ normal
+    user_amt_min_30D                       -0.15957  ↓ normal
+    is_month_start                         -0.15548  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    impossible_travel                      31.91258  [HIGH]
+    impossible_travel_x_amt                15.02710  [HIGH]
+    user_amt_std_30D                       14.33310  [HIGH]
+    user_missing_rate_hist                 9.03298  [HIGH]
+    user_amt_std_7D                        7.58147  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 2935.63
+    User 7D avg amount                  : 2935.63
+    Amount z-score (30D)                : 0.21
+    Amount z-score (7D)                 : 0.21
+    Txns in past 1h                     : 1.00
+    Txns in past 30D                    : 3.00
+    New city for user                   : Yes
+    New device for user                 : No
+    Cold-start user                     : No
+    Impossible travel flag              : Yes
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 0.90
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #41 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1064
+  Time     : 2025-06-02 19:56:59
+  Amount   : UNKNOWN4850.89
+  City     : Glasgow
+  Device   : UNKNOWN
+  Txn Type : withdrawal
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.317  |  TIER: TIER_1  |  MODEL AGREEMENT: 2/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ⬜ Rule Engine       score=0.000
+    ✅ Isolation Forest  score=0.951
+    ✅ Autoencoder       score=0.008
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → nan
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    new_device_x_amt_zscore                -0.23125  ↓ normal
+    new_device_new_city_x_amt              -0.22558  ↓ normal
+    amount_above_p95                       -0.18770  ↓ normal
+    user_amt_max_15D                       -0.18734  ↓ normal
+    new_city_x_zscore_30D                  -0.17125  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    new_city_x_zscore_30D                  145.73181  [HIGH]
+    velocity_ratio_1h_vs_30D_baseline      29.60688  [HIGH]
+    user_amt_zscore_30D                    12.83317  [HIGH]
+    user_amt_ratio_vs_mean_30D             11.15734  [HIGH]
+    user_amt_ratio_vs_max_30D              10.75953  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 419.33
+    User 7D avg amount                  : 419.33
+    Amount z-score (30D)                : 10.00
+    Amount z-score (7D)                 : 10.00
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 2.00
+    New city for user                   : Yes
+    New device for user                 : Yes
+    Cold-start user                     : Yes
+    Impossible travel flag              : No
+    Missing metadata fields             : 2.00
+    Amount ratio vs prev txn            : 12.53
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #42 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1068
+  Time     : 2025-06-02 18:08:34
+  Amount   : €2544.22
+  City     : London
+  Device   : Samsung Galaxy S10
+  Txn Type : transfer
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.316  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.167
+    ✅ Isolation Forest  score=0.556
+    ✅ Autoencoder       score=0.003
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → New city 'London' but only 6.8 minutes since last transaction
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    velocity_ratio_1h_vs_30D_baseline      -0.36239  ↓ normal
+    user_velocity_1h                       -0.26133  ↓ normal
+    impossible_travel                      -0.25359  ↓ normal
+    new_device_new_city_x_amt              -0.23402  ↓ normal
+    is_burst_30min                         -0.21002  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    impossible_travel                      26.26797  [HIGH]
+    velocity_ratio_1h_vs_30D_baseline      16.11299  [HIGH]
+    is_burst_30min                         11.33811  [HIGH]
+    impossible_travel_x_amt                6.09727  [HIGH]
+    is_new_device                          5.68928  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1713.89
+    User 7D avg amount                  : 1713.89
+    Amount z-score (30D)                : 0.56
+    Amount z-score (7D)                 : 0.56
+    Txns in past 1h                     : 2.00
+    Txns in past 30D                    : 5.00
+    New city for user                   : Yes
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : Yes
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 2.05
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #43 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1005
+  Time     : 2025-06-09 08:15:24
+  Amount   : $4738.39
+  City     : Glasgow
+  Device   : Samsung Galaxy S10
+  Txn Type : deposit
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.314  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.167
+    ✅ Isolation Forest  score=0.546
+    ✅ Autoencoder       score=0.004
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → New city 'Glasgow' but only 52.7 minutes since last transaction
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    amount_above_p95                       -0.32439  ↓ normal
+    impossible_travel                      -0.21068  ↓ normal
+    user_txntype_velocity_1h               -0.19459  ↓ normal
+    amt_above_user_p95                     -0.17243  ↓ normal
+    user_amt_sum_1h                        -0.16685  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    impossible_travel                      78.78506  [HIGH]
+    velocity_ratio_1h_vs_30D_baseline      10.77564  [HIGH]
+    amount_above_p95                       6.94795  [HIGH]
+    new_device_x_amt_zscore                5.55345  [HIGH]
+    impossible_travel_x_amt                5.32175  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 2436.31
+    User 7D avg amount                  : 2436.31
+    Amount z-score (30D)                : 1.57
+    Amount z-score (7D)                 : 1.57
+    Txns in past 1h                     : 1.00
+    Txns in past 30D                    : 9.00
+    New city for user                   : Yes
+    New device for user                 : No
+    Cold-start user                     : No
+    Impossible travel flag              : Yes
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 1.15
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #44 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1050
+  Time     : 2025-06-02 13:14:07
+  Amount   : £2090.05
+  City     : Glasgow
+  Device   : Samsung Galaxy S10
+  Txn Type : refund
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.314  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.167
+    ✅ Isolation Forest  score=0.549
+    ✅ Autoencoder       score=0.002
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → New city 'Glasgow' but only 17.0 minutes since last transaction
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    velocity_ratio_1h_vs_30D_baseline      -0.29026  ↓ normal
+    user_velocity_30min                    -0.23930  ↓ normal
+    impossible_travel                      -0.22478  ↓ normal
+    is_burst_30min                         -0.20230  ↓ normal
+    impossible_travel_x_amt                -0.19883  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    impossible_travel_x_amt                13.39113  [HIGH]
+    user_missing_rate_hist                 12.03378  [HIGH]
+    impossible_travel                      8.53870  [HIGH]
+    velocity_ratio_1h_vs_30D_baseline      7.47565  [HIGH]
+    user_amt_std_30D                       3.86255  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 2366.10
+    User 7D avg amount                  : 2366.10
+    Amount z-score (30D)                : -0.14
+    Amount z-score (7D)                 : -0.14
+    Txns in past 1h                     : 1.00
+    Txns in past 30D                    : 3.00
+    New city for user                   : Yes
+    New device for user                 : No
+    Cold-start user                     : No
+    Impossible travel flag              : Yes
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 0.57
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #45 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1079
+  Time     : 2025-06-03 06:38:48
+  Amount   : £3989.44
+  City     : UNKNOWN
+  Device   : UNKNOWN
+  Txn Type : withdrawal
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.306  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.083
+    ✅ Isolation Forest  score=0.724
+    ✅ Autoencoder       score=0.002
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → Both city and device metadata are UNKNOWN (total missing fields: 2)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    user_amt_max_15D                       -0.21260  ↓ normal
+    user_device_amt_max_1D                 -0.19959  ↓ normal
+    new_city_x_zscore_30D                  -0.17267  ↓ normal
+    is_device_missing                      -0.16554  ↓ normal
+    is_both_geo_dev_missing                -0.15250  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    new_device_x_amt_zscore                12.36349  [HIGH]
+    user_missing_rate_hist                 11.48774  [HIGH]
+    user_amt_max_30D                       11.33896  [HIGH]
+    is_new_device                          8.27155  [HIGH]
+    is_cold_start                          6.76693  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1163.51
+    User 7D avg amount                  : 1163.51
+    Amount z-score (30D)                : 1.96
+    Amount z-score (7D)                 : 1.96
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 1.00
+    New city for user                   : Yes
+    New device for user                 : No
+    Cold-start user                     : Yes
+    Impossible travel flag              : No
+    Missing metadata fields             : 2.00
+    Amount ratio vs prev txn            : 3.43
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #46 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1068
+  Time     : 2025-06-02 18:01:48
+  Amount   : €1242.07
+  City     : Birmingham
+  Device   : Huawei P30
+  Txn Type : deposit
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.300  |  TIER: TIER_1  |  MODEL AGREEMENT: 2/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.167
+    ⬜ Isolation Forest  score=0.507
+    ✅ Autoencoder       score=0.001
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → New city 'Birmingham' but only 52.2 minutes since last transaction
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    velocity_ratio_1h_vs_30D_baseline      -0.26424  ↓ normal
+    impossible_travel                      -0.22482  ↓ normal
+    new_device_and_new_city                -0.17082  ↓ normal
+    user_device_is_first_occurrence        -0.16742  ↓ normal
+    is_month_start                         -0.16316  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    impossible_travel_x_amt                14.49164  [HIGH]
+    user_missing_rate_hist                 7.91123  [HIGH]
+    user_amt_sum_1h                        7.89941  [HIGH]
+    user_amt_std_30D                       4.83390  [HIGH]
+    is_new_device                          2.87236  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1831.85
+    User 7D avg amount                  : 1831.85
+    Amount z-score (30D)                : -0.35
+    Amount z-score (7D)                 : -0.35
+    Txns in past 1h                     : 1.00
+    Txns in past 30D                    : 4.00
+    New city for user                   : Yes
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : Yes
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 1.89
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #47 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1028
+  Time     : 2025-06-02 22:04:13
+  Amount   : £3475.19
+  City     : Manchester
+  Device   : Huawei P30
+  Txn Type : purchase
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.297  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.125
+    ✅ Isolation Forest  score=0.597
+    ✅ Autoencoder       score=0.003
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → Amount z-score=9.32 exceeds threshold 3 (user 30D mean=1209, amount=3475)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    user_amt_std_15D                       -0.20693  ↓ normal
+    user_txntype_is_first_occurrence       -0.17708  ↓ normal
+    user_device_amt_max_1D                 -0.16814  ↓ normal
+    is_month_start                         -0.16682  ↓ normal
+    user_amt_max_15D                       -0.16012  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    new_city_x_zscore_30D                  25.58380  [HIGH]
+    user_amt_zscore_30D                    18.84028  [HIGH]
+    user_amt_zscore_7D                     11.84189  [HIGH]
+    user_amt_std_30D                       8.06486  [HIGH]
+    city_changed_from_prev                 5.47661  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1208.81
+    User 7D avg amount                  : 1208.81
+    Amount z-score (30D)                : 9.32
+    Amount z-score (7D)                 : 9.32
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 3.00
+    New city for user                   : No
+    New device for user                 : No
+    Cold-start user                     : No
+    Impossible travel flag              : No
+    Missing metadata fields             : 0.00
+    Amount ratio vs prev txn            : 2.34
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #48 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1020
+  Time     : 2025-06-02 13:58:05
+  Amount   : UNKNOWN4161.03
+  City     : Manchester
+  Device   : Nokia 3310
+  Txn Type : withdrawal
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.296  |  TIER: TIER_1  |  MODEL AGREEMENT: 2/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.125
+    ✅ Isolation Forest  score=0.597
+    ⬜ Autoencoder       score=0.001
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → Amount z-score=3.56 exceeds threshold 3 (user 30D mean=1349, amount=4161)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    user_txntype_velocity_12h              -0.17680  ↓ normal
+    user_velocity_6h                       -0.17281  ↓ normal
+    user_txntype_velocity_6h               -0.17198  ↓ normal
+    amt_above_user_p95                     -0.15323  ↓ normal
+    user_velocity_12h                      -0.14153  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    amt_ratio_vs_user_p95                  7.01906  [HIGH]
+    user_velocity_6h                       6.89460  [HIGH]
+    user_amt_max_30D                       6.17608  [HIGH]
+    amt_above_user_p95                     4.32142  [HIGH]
+    user_amt_sum_6h                        2.28209  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1348.68
+    User 7D avg amount                  : 1348.68
+    Amount z-score (30D)                : 3.56
+    Amount z-score (7D)                 : 3.56
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 7.00
+    New city for user                   : No
+    New device for user                 : No
+    Cold-start user                     : No
+    Impossible travel flag              : No
+    Missing metadata fields             : 1.00
+    Amount ratio vs prev txn            : 2.60
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #49 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1004
+  Time     : 2025-06-11 06:11:36
+  Amount   : UNKNOWN4655.0
+  City     : UNKNOWN
+  Device   : Samsung Galaxy S10
+  Txn Type : withdrawal
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.294  |  TIER: TIER_1  |  MODEL AGREEMENT: 2/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.125
+    ✅ Isolation Forest  score=0.591
+    ⬜ Autoencoder       score=0.001
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → First use of device 'Samsung Galaxy S10', amount z-score=2.58 (>2.0)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    new_device_x_amt_zscore                -0.26432  ↓ normal
+    new_device_new_city_x_amt              -0.20965  ↓ normal
+    new_device_and_new_city                -0.18475  ↓ normal
+    new_city_x_new_device                  -0.16771  ↓ normal
+    is_new_city                            -0.15231  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    new_device_x_amt_zscore                8.34376  [HIGH]
+    user_amt_std_30D                       7.31778  [HIGH]
+    new_city_x_amt_zscore                  4.34900  [HIGH]
+    is_cold_start                          4.17492  [HIGH]
+    new_city_x_zscore_30D                  3.96645  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 2693.36
+    User 7D avg amount                  : 2693.36
+    Amount z-score (30D)                : 2.58
+    Amount z-score (7D)                 : 2.58
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 4.00
+    New city for user                   : Yes
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : No
+    Missing metadata fields             : 2.00
+    Amount ratio vs prev txn            : 2.08
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n
+  ── RANK #50 by Risk Score ──
+═════════════════════════════════════════════════════════════════
+  FRAUD INVESTIGATION REPORT
+═════════════════════════════════════════════════════════════════
+  User     : user1058
+  Time     : 2025-06-02 13:55:30
+  Amount   : UNKNOWN4957.12
+  City     : UNKNOWN
+  Device   : UNKNOWN
+  Txn Type : deposit
+─────────────────────────────────────────────────────────────────
+  RISK SCORE : 0.294  |  TIER: TIER_1  |  MODEL AGREEMENT: 3/3
+─────────────────────────────────────────────────────────────────
+  Model Detections:
+    ✅ Rule Engine       score=0.083
+    ✅ Isolation Forest  score=0.689
+    ✅ Autoencoder       score=0.002
+─────────────────────────────────────────────────────────────────
+  Rule Flags Triggered:
+    → Both city and device metadata are UNKNOWN (total missing fields: 3)
+─────────────────────────────────────────────────────────────────
+  Top Features — Isolation Forest (SHAP):
+    new_device_x_amt_zscore                -0.30774  ↓ normal
+    amount_above_p95                       -0.27263  ↓ normal
+    user_device_is_first_occurrence        -0.23763  ↓ normal
+    amount_above_p99                       -0.21281  ↓ normal
+    amt_above_user_p95                     -0.20153  ↓ normal
+─────────────────────────────────────────────────────────────────
+  Autoencoder Reconstruction Error (top features):
+    new_device_x_amt_zscore                34.33110  [HIGH]
+    is_new_device                          7.49964  [HIGH]
+    new_city_x_amt_zscore                  4.15446  [HIGH]
+    amount_above_p95                       3.34274  [HIGH]
+    amount_above_p99                       3.15371  [HIGH]
+─────────────────────────────────────────────────────────────────
+  Transaction Context:
+    User 30D avg amount                 : 1727.17
+    User 7D avg amount                  : 1727.17
+    Amount z-score (30D)                : 1.70
+    Amount z-score (7D)                 : 1.70
+    Txns in past 1h                     : 0.00
+    Txns in past 30D                    : 6.00
+    New city for user                   : No
+    New device for user                 : Yes
+    Cold-start user                     : No
+    Impossible travel flag              : No
+    Missing metadata fields             : 3.00
+    Amount ratio vs prev txn            : 5.06
+    Burst (<5min gap)                   : No
+─────────────────────────────────────────────────────────────────
+  RECOMMENDED ACTION: AUTO-BLOCK: Decline transaction. Notify user. Escalate to fraud team.
+═════════════════════════════════════════════════════════════════\n

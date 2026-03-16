@@ -1,123 +1,99 @@
-"""
-src/models/ensemble.py
------------------------
-Weighted ensemble combining Rule Engine, Isolation Forest, and Autoencoder scores
-into a single final_risk_score in [0, 1].
-
-Weight justification:
-    Default weights are equal (0.33 each) — this is the principled default
-    when no analyst feedback is available to tune them.
-    Weights should be updated via precision-at-K tuning once analyst-reviewed
-    labels accumulate.
-
-Risk tiering:
-    Tier 1 (>= 0.75) : Auto-block / immediate analyst review
-    Tier 2 (0.50-0.75): Step-up authentication
-    Tier 3 (0.25-0.50): Silent monitoring
-    Normal (< 0.25)   : No action
-"""
-
 import pandas as pd
 import numpy as np
+from dataclasses import dataclass, field
+from typing import Dict, Optional
 
-# Default equal weights — update after analyst feedback
 DEFAULT_WEIGHTS = {
     "rule_score": 0.33,
     "if_score":   0.33,
     "ae_score":   0.34,
 }
 
-TIER_THRESHOLDS = {
-    "TIER_1": 0.75,
-    "TIER_2": 0.50,
-    "TIER_3": 0.25,
-}
 
+@dataclass
+class EnsembleScorer:
+    # Per-score training ranges
+    score_ranges: Dict[str, tuple] = field(default_factory=dict)
+    # Tier thresholds computed from training ensemble scores
+    tier_thresholds: Dict[str, float] = field(default_factory=lambda: {
+        "TIER_1": 0.75, "TIER_2": 0.50, "TIER_3": 0.25
+    })
+    # Ensemble weights
+    weights: Dict[str, float] = field(default_factory=lambda: dict(DEFAULT_WEIGHTS))
 
-def _minmax(series: pd.Series) -> pd.Series:
-    mn, mx = series.min(), series.max()
-    if mx == mn:
-        return pd.Series(np.zeros(len(series)), index=series.index)
-    return (series - mn) / (mx - mn)
+    def score(self, df: pd.DataFrame) -> pd.DataFrame:
+        out    = df.copy()
+        scores = ["rule_score", "if_score", "ae_score"]
 
+        for col in scores:
+            if col not in out.columns:
+                out[col] = 0.0
 
-def compute_ensemble_score(
-    df: pd.DataFrame,
-    weights: dict = None,
-) -> pd.DataFrame:
-    """
-    Compute the final composite risk score.
+            if col in self.score_ranges:
+                mn, mx = self.score_ranges[col]
+                # Clip to [0,1]: values outside training range are extreme anomalies
+                out[f"{col}_norm"] = np.clip(
+                    (out[col].fillna(0) - mn) / (mx - mn + 1e-9), 0.0, 1.0
+                )
+            else:
+                # Fallback if range not available for this score
+                out[f"{col}_norm"] = out[col].fillna(0)
 
-    Expects these columns to exist in df (added by individual model scorers):
-        rule_score  : float [0,1]
-        if_score    : float [0,1]
-        ae_score    : float [0,1]
+        # Weighted sum (already in [0,1] so no re-normalization needed)
+        out["final_risk_score"] = (
+            self.weights.get("rule_score", 0.33) * out["rule_score_norm"] +
+            self.weights.get("if_score",   0.33) * out["if_score_norm"]   +
+            self.weights.get("ae_score",   0.34) * out["ae_score_norm"]
+        ).clip(0.0, 1.0)
 
-    Adds columns:
-        final_risk_score : float [0,1]
-        risk_tier        : str (TIER_1 / TIER_2 / TIER_3 / NORMAL)
-        model_agreement  : int (how many models independently flagged this row)
-    """
-    if weights is None:
-        weights = DEFAULT_WEIGHTS
+        # Tier assignment using frozen thresholds
+        out["risk_tier"] = out["final_risk_score"].apply(
+            lambda s: (
+                "TIER_1" if s >= self.tier_thresholds["TIER_1"] else
+                "TIER_2" if s >= self.tier_thresholds["TIER_2"] else
+                "TIER_3" if s >= self.tier_thresholds["TIER_3"] else
+                "NORMAL"
+            )
+        )
 
-    out = df.copy()
-
-    # Re-normalize each score to [0,1] across the full dataset
-    # (individual models may have already done this, but we re-normalize
-    #  to ensure comparability before weighting)
-    for col in ["rule_score", "if_score", "ae_score"]:
-        if col not in out.columns:
-            out[col] = 0.0
-        out[f"{col}_norm"] = _minmax(out[col].fillna(0))
-
-    # Weighted sum
-    out["final_risk_score"] = (
-        weights.get("rule_score", 0.33) * out["rule_score_norm"] +
-        weights.get("if_score",   0.33) * out["if_score_norm"]   +
-        weights.get("ae_score",   0.34) * out["ae_score_norm"]
-    )
-
-    # Re-normalize final score to [0,1]
-    out["final_risk_score"] = _minmax(out["final_risk_score"])
-
-    # Risk tier assignment
-    def _assign_tier(score):
-        if score >= TIER_THRESHOLDS["TIER_1"]:
-            return "TIER_1"
-        elif score >= TIER_THRESHOLDS["TIER_2"]:
-            return "TIER_2"
-        elif score >= TIER_THRESHOLDS["TIER_3"]:
-            return "TIER_3"
-        return "NORMAL"
-
-    out["risk_tier"] = out["final_risk_score"].apply(_assign_tier)
-
-    # Model agreement: count of individual model flags
-    flag_cols = [c for c in ["rule_flag_count", "if_is_anomaly", "ae_is_anomaly"]
-                 if c in out.columns]
-    if flag_cols:
+        # Model agreement
         rule_flag = (out.get("rule_flag_count", pd.Series(0, index=out.index)) > 0).astype(int)
         if_flag   = out.get("if_is_anomaly",   pd.Series(0, index=out.index))
         ae_flag   = out.get("ae_is_anomaly",   pd.Series(0, index=out.index))
         out["model_agreement"] = rule_flag + if_flag + ae_flag
-    else:
-        out["model_agreement"] = 0
-
-    # Print tier distribution
-    tier_counts = out["risk_tier"].value_counts()
-    print("\n[Ensemble] Risk Tier Distribution:")
-    for tier in ["TIER_1", "TIER_2", "TIER_3", "NORMAL"]:
-        n = tier_counts.get(tier, 0)
-        print(f"  {tier:<8}: {n:>5} ({100*n/len(out):.1f}%)")
-
-    return out
 
 
-def get_top_anomalies(df: pd.DataFrame, top_n: int = 50) -> pd.DataFrame:
-    """Return the top-N highest risk transactions sorted by final_risk_score."""
-    return (
-        df.sort_values("final_risk_score", ascending=False)
-        .head(top_n)
-        .reset_index(drop=True)
-    )
+        return out
+
+
+def fit_ensemble(
+    train_scored_df: pd.DataFrame,
+    weights: Optional[Dict] = None,
+) -> EnsembleScorer:
+    scorer  = EnsembleScorer(weights=weights or dict(DEFAULT_WEIGHTS))
+    scores  = ["rule_score", "if_score", "ae_score"]
+
+    # Freeze per-score ranges from training data
+    for col in scores:
+        if col in train_scored_df.columns:
+            vals = train_scored_df[col].fillna(0)
+            scorer.score_ranges[col] = (float(vals.min()), float(vals.max()))
+            print(f"  Frozen range [{col}]: [{vals.min():.4f}, {vals.max():.4f}]")
+
+    # Compute a temporary ensemble score on training data to set tier thresholds
+    temp = scorer.score(train_scored_df)
+    train_ensemble_scores = temp["final_risk_score"]
+
+    # Tier thresholds = percentiles of the training ensemble score distribution
+    # This means TIER_1 = top 1%, TIER_2 = top 5%, TIER_3 = top 25%
+    scorer.tier_thresholds = {
+        "TIER_1": round(float(np.percentile(train_ensemble_scores, 99)), 4),
+        "TIER_2": round(float(np.percentile(train_ensemble_scores, 95)), 4),
+        "TIER_3": round(float(np.percentile(train_ensemble_scores, 75)), 4),
+    }
+
+    print(f"\n  Frozen tier thresholds (from training percentiles):")
+    for tier, thr in scorer.tier_thresholds.items():
+        print(f"    {tier}: >= {thr:.4f}")
+
+    return scorer

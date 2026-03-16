@@ -1,539 +1,608 @@
-"""
-src/models/autoencoder.py
---------------------------
-Deep Autoencoder with Entity Embeddings for transaction anomaly detection.
-
-Architecture:
-    Two input streams:
-      1. Continuous features → dense encoder
-      2. Categorical features (user_id, city, device, txn_type) →
-         separate Embedding layers → concatenated with continuous stream
-
-    Combined representation → bottleneck → decoder → reconstruction
-
-    Anomaly score = reconstruction error (MSE on continuous features
-    + cross-entropy on categorical reconstructions)
-
-Why entity embeddings?
-    High-cardinality categoricals like user_id (100+ users) cannot be
-    one-hot encoded into Isolation Forest (too sparse, too high-dimensional).
-    Embeddings learn dense 16-dim behavioral fingerprints: users with
-    similar transaction patterns get similar embedding vectors.
-    The autoencoder handles the categorical signal; IF handles continuous.
-
-Fallback:
-    If PyTorch is unavailable, a sklearn MLPRegressor-based autoencoder
-    is used on continuous features only (no embeddings).
-"""
-
+import warnings
 import numpy as np
 import pandas as pd
 from typing import Dict, List, Optional, Tuple
-import warnings
 
-from src.features.feature_engineer import CONTINUOUS_FEATURES
+warnings.filterwarnings("ignore")
 
-# ── Try importing PyTorch ─────────────────────────────────────────────────────
-try:
-    import torch
-    import torch.nn as nn
-    from torch.utils.data import Dataset, DataLoader
-    TORCH_AVAILABLE = True
-except ImportError:
-    TORCH_AVAILABLE = False
-    warnings.warn(
-        "PyTorch not available. Using sklearn MLPRegressor fallback "
-        "(no entity embeddings — install torch for full functionality)."
-    )
 
-# ── Vocabulary builder ────────────────────────────────────────────────────────
+import torch
+import torch.nn as nn
+from torch.utils.data import Dataset, DataLoader
+TORCH_AVAILABLE = True
 
-CATEGORICAL_COLS = ["user_id", "city", "device", "txn_type"]
-UNK_TOKEN = "<UNK>"
+
+CATEGORICAL_EMBEDDING_CONFIG = {
+    "user_id":  {"lag_col": None,            "emb_dim": 16},
+    "city":     {"lag_col": "prev_city",     "emb_dim": 4},
+    "device":   {"lag_col": "prev_device",   "emb_dim": 4},
+    "txn_type": {"lag_col": "prev_txn_type", "emb_dim": 3},
+    "currency": {"lag_col": "prev_currency", "emb_dim": 2},
+}
+
+# Total embedding dimension when all are concatenated
+TOTAL_EMB_DIM = sum(
+    cfg["emb_dim"] * (2 if cfg["lag_col"] else 1)
+    for cfg in CATEGORICAL_EMBEDDING_CONFIG.values()
+)  # = 16 + 4*2 + 4*2 + 3*2 + 2*2 = 16+8+8+6+4 = 42
+
+# Special token indices (0=UNK, 1=FIRST_TXN)
+UNK_IDX   = 0
+FIRST_TXN_IDX = 1
+
+
 
 def build_vocabularies(fit_df: pd.DataFrame) -> Dict[str, Dict[str, int]]:
     """
-    Build integer-index vocabulary for each categorical column.
-    Index 0 is always reserved for <UNK> (unseen categories at score time).
+    Build integer vocabularies for each categorical column.
+    Index 0: <UNK> — unseen values at score time
+    Index 1: <FIRST_TXN> — NaN lag values (first transaction for user)
+    Index 2+: actual category values from fit window
     """
     vocabs = {}
-    for col in CATEGORICAL_COLS:
-        unique_vals = fit_df[col].dropna().unique().tolist()
-        vocab = {UNK_TOKEN: 0}
-        for i, val in enumerate(unique_vals, start=1):
-            vocab[str(val)] = i
+    for col in CATEGORICAL_EMBEDDING_CONFIG:
+        vals  = fit_df[col].dropna().astype(str).unique().tolist()
+        vocab = {"<UNK>": 0, "<FIRST_TXN>": 1}
+        for i, v in enumerate(sorted(vals), start=2):
+            vocab[v] = i
         vocabs[col] = vocab
-        print(f"  Vocab '{col}': {len(vocab)} tokens (incl. <UNK>)")
+        lag_col = CATEGORICAL_EMBEDDING_CONFIG[col]["lag_col"]
+        print(f"  Vocab '{col}' (shared with '{lag_col}'): "
+              f"{len(vocab)} tokens (incl. UNK, FIRST_TXN)")
     return vocabs
 
 
-def encode_categoricals(df: pd.DataFrame, vocabs: Dict[str, Dict[str, int]]) -> pd.DataFrame:
+def encode_categoricals(
+    df: pd.DataFrame,
+    vocabs: Dict[str, Dict[str, int]],
+) -> pd.DataFrame:
     """
-    Map categorical string values to integer indices using pre-built vocabs.
-    Unknown values (including new users/cities at score time) → 0 (<UNK>).
+    - Current categoricals: unknown value → UNK_IDX (0)
+    - Lag categoricals: NaN (first txn) → FIRST_TXN_IDX (1),
+                        unknown value    → UNK_IDX (0)
     """
     out = df.copy()
-    for col in CATEGORICAL_COLS:
-        if col in out.columns:
-            vocab = vocabs[col]
-            out[f"{col}_idx"] = out[col].astype(str).map(
-                lambda x, v=vocab: v.get(x, 0)
-            )
+    for col, cfg in CATEGORICAL_EMBEDDING_CONFIG.items():
+        vocab = vocabs[col]
+        # Current
+        out[f"{col}_idx"] = out[col].astype(str).map(
+            lambda x, v=vocab: v.get(x, UNK_IDX)
+        ).astype(int)
+        # Lag (if it exists in the DataFrame)
+        lag = cfg["lag_col"]
+        if lag and lag in out.columns:
+            out[f"{lag}_idx"] = out[lag].apply(
+                lambda x, v=vocab: FIRST_TXN_IDX if pd.isna(x) else v.get(str(x), UNK_IDX)
+            ).astype(int)
+        elif lag:
+            # Lag column doesn't exist yet — fill with FIRST_TXN
+            out[f"{lag}_idx"] = FIRST_TXN_IDX
     return out
 
 
-# ── PyTorch Implementation ─────────────────────────────────────────────────────
 
 if TORCH_AVAILABLE:
 
     class TransactionDataset(Dataset):
-        """PyTorch Dataset wrapping continuous + categorical feature arrays."""
+        """
+        categorical_indices shape: (n_cat_inputs,) where:
+            positions 0..4 = current [user_id, city, device, txn_type, currency]
+            positions 5..8 = lag     [prev_city, prev_device, prev_txn_type, prev_currency]
+        """
 
-        def __init__(self, X_cont: np.ndarray, X_cat: np.ndarray):
+        def __init__(
+            self,
+            X_cont: np.ndarray,
+            X_cat:  np.ndarray,
+        ):
             self.X_cont = torch.FloatTensor(X_cont)
             self.X_cat  = torch.LongTensor(X_cat)
 
-        def __len__(self):
+        def __len__(self) -> int:
             return len(self.X_cont)
 
         def __getitem__(self, idx):
             return self.X_cont[idx], self.X_cat[idx]
 
 
-    class FraudAutoencoder(nn.Module):
-        """
-        Autoencoder with entity embedding layers for categorical inputs.
-
-        Embedding dimensions follow the rule of thumb:
-            min(50, (cardinality // 2) + 1)
-        """
-
-        def __init__(self, n_continuous: int, vocab_sizes: Dict[str, int]):
+    class _Block(nn.Module):
+        """Fully-connected block: Linear → BatchNorm → LeakyReLU → Dropout."""
+        def __init__(self, in_dim: int, out_dim: int,
+                     dropout: float = 0.1, bn: bool = True):
             super().__init__()
+            layers = [nn.Linear(in_dim, out_dim)]
+            if bn: layers.append(nn.BatchNorm1d(out_dim))
+            layers.append(nn.LeakyReLU(0.1, inplace=True))
+            if dropout > 0: layers.append(nn.Dropout(dropout))
+            self.block = nn.Sequential(*layers)
 
-            # ── Embedding layers (one per categorical) ────────────────────────
+        def forward(self, x):
+            return self.block(x)
+
+
+    class FraudAutoencoder(nn.Module):
+        def __init__(
+            self,
+            n_continuous: int,
+            vocab_sizes:  Dict[str, int],
+            bottleneck_dim: int = 16,
+            dropout: float = 0.1,
+        ):
+            super().__init__()
+            self.n_continuous    = n_continuous
+            self.bottleneck_dim  = bottleneck_dim
+            self.cat_col_order   = list(CATEGORICAL_EMBEDDING_CONFIG.keys())
+
+            # ── Shared embedding tables (one per categorical type) ─────────────
             self.embeddings = nn.ModuleDict()
-            self.emb_dims   = {}
-            total_emb_dim   = 0
-            for col, vocab_size in vocab_sizes.items():
-                emb_dim = min(50, (vocab_size // 2) + 1)
+            for col, cfg in CATEGORICAL_EMBEDDING_CONFIG.items():
+                vocab_size = vocab_sizes[col]
                 self.embeddings[col] = nn.Embedding(
                     num_embeddings=vocab_size,
-                    embedding_dim=emb_dim,
-                    padding_idx=0,    # 0 = <UNK>
+                    embedding_dim=cfg["emb_dim"],
+                    padding_idx=UNK_IDX,  # <UNK> has zero gradient
                 )
-                self.emb_dims[col] = emb_dim
-                total_emb_dim += emb_dim
 
-            # Total input dimension = continuous features + all embeddings
-            input_dim = n_continuous + total_emb_dim
+            # ── Continuous normalisation (learnable scale/shift) 
+            self.cont_bn = nn.BatchNorm1d(n_continuous)
 
-            # ── Encoder ───────────────────────────────────────────────────────
-            encoder_dims = [input_dim, 64, 32, 16]
-            encoder_layers = []
-            for i in range(len(encoder_dims) - 1):
-                encoder_layers.extend([
-                    nn.Linear(encoder_dims[i], encoder_dims[i+1]),
-                    nn.BatchNorm1d(encoder_dims[i+1]),
-                    nn.ReLU(),
-                    nn.Dropout(0.1),
-                ])
-            self.encoder = nn.Sequential(*encoder_layers)
+            # Total input = continuous + current embeddings + lag embeddings
+            input_dim = n_continuous + TOTAL_EMB_DIM
 
-            # Bottleneck dimension
-            self.bottleneck_dim = 8
-            self.bottleneck = nn.Linear(16, self.bottleneck_dim)
+            # ── Encoder 
+            self.encoder = nn.Sequential(
+                _Block(input_dim, 256, dropout=dropout),
+                _Block(256, 128, dropout=dropout),
+                _Block(128,  64, dropout=dropout),
+            )
+            self.bottleneck   = nn.Linear(64, bottleneck_dim)
+            self.bottleneck_act = nn.LeakyReLU(0.1)
 
-            # ── Decoder ───────────────────────────────────────────────────────
-            decoder_dims = [self.bottleneck_dim, 16, 32, 64]
-            decoder_layers = []
-            for i in range(len(decoder_dims) - 1):
-                decoder_layers.extend([
-                    nn.Linear(decoder_dims[i], decoder_dims[i+1]),
-                    nn.BatchNorm1d(decoder_dims[i+1]),
-                    nn.ReLU(),
-                ])
-            self.decoder = nn.Sequential(*decoder_layers)
+            # ── Decoder 
+            self.decoder = nn.Sequential(
+                _Block(bottleneck_dim,  64, dropout=0.0),
+                _Block(64,  128, dropout=0.0),
+                _Block(128, 256, dropout=0.0),
+            )
 
-            # Output heads
-            # One head reconstructs continuous features (MSE loss)
-            self.output_continuous = nn.Linear(64, n_continuous)
+            # ── Output heads 
+            # Continuous reconstruction
+            self.out_continuous = nn.Linear(256, n_continuous)
 
-            # One head per categorical reconstructs the category (CrossEntropy loss)
-            self.output_categorical = nn.ModuleDict({
-                col: nn.Linear(64, vocab_size)
-                for col, vocab_size in vocab_sizes.items()
+            # One classification head per categorical
+            self.out_categoricals = nn.ModuleDict({
+                col: nn.Linear(256, vocab_sizes[col])
+                for col in self.cat_col_order
             })
 
-            self.n_continuous = n_continuous
-            self.vocab_sizes  = vocab_sizes
-            self.cat_col_order = list(vocab_sizes.keys())
+        def _embed_all(self, x_cat: torch.Tensor) -> torch.Tensor:
+            parts = []
+            col_idx = 0
+            for col, cfg in CATEGORICAL_EMBEDDING_CONFIG.items():
+                # Current embedding
+                parts.append(self.embeddings[col](x_cat[:, col_idx]))
+                col_idx += 1
+                # Lag embedding (shares same table)
+                if cfg["lag_col"]:
+                    parts.append(self.embeddings[col](x_cat[:, col_idx]))
+                    col_idx += 1
+            return torch.cat(parts, dim=1)  # (batch, TOTAL_EMB_DIM)
 
-        def forward(self, x_cont, x_cat):
-            """
-            x_cont : (batch, n_continuous)
-            x_cat  : (batch, n_categoricals)  — integer indices
-            """
-            # Embed each categorical and concatenate
-            emb_parts = []
-            for i, col in enumerate(self.cat_col_order):
-                emb = self.embeddings[col](x_cat[:, i])
-                emb_parts.append(emb)
+        def forward(self, x_cont: torch.Tensor, x_cat: torch.Tensor):
+            # Normalise continuous input
+            x_cont_norm = self.cont_bn(x_cont)
 
-            x_emb = torch.cat(emb_parts, dim=1)            # (batch, total_emb_dim)
-            x_in  = torch.cat([x_cont, x_emb], dim=1)     # (batch, input_dim)
+            # Embed categoricals
+            x_emb = self._embed_all(x_cat)
 
-            # Encode
-            encoded    = self.encoder(x_in)
-            bottleneck = self.bottleneck(encoded)
+            # Concatenate and encode
+            x_in      = torch.cat([x_cont_norm, x_emb], dim=1)
+            encoded   = self.encoder(x_in)
+            z         = self.bottleneck_act(self.bottleneck(encoded))
 
             # Decode
-            decoded = self.decoder(bottleneck)
+            decoded = self.decoder(z)
 
-            # Reconstruct continuous
-            recon_cont = self.output_continuous(decoded)
-
-            # Reconstruct categoricals (logits, not softmax — CrossEntropyLoss handles that)
-            recon_cat = {
-                col: self.output_categorical[col](decoded)
+            # Reconstruction heads
+            recon_cont = self.out_continuous(decoded)
+            recon_cat  = {
+                col: self.out_categoricals[col](decoded)
                 for col in self.cat_col_order
             }
 
-            return recon_cont, recon_cat, bottleneck
+            return recon_cont, recon_cat, z
 
-        def get_embeddings(self, col: str, indices: torch.Tensor) -> torch.Tensor:
-            """Extract embedding vectors for a specific categorical column."""
-            return self.embeddings[col](indices)
-
-
-# ── Sklearn fallback autoencoder (no embeddings) ─────────────────────────────
-
-class SklearnAutoencoderFallback:
-    """
-    MLP-based autoencoder using sklearn. Used when PyTorch is unavailable.
-    Operates on continuous features only — no entity embeddings.
-    """
-
-    def __init__(self):
-        from sklearn.neural_network import MLPRegressor
-        from sklearn.preprocessing import StandardScaler
-        self.scaler = StandardScaler()
-        self.model  = MLPRegressor(
-            hidden_layer_sizes=(64, 32, 16, 32, 64),
-            activation="relu",
-            max_iter=200,
-            random_state=42,
-            early_stopping=True,
-            validation_fraction=0.1,
-            n_iter_no_change=10,
-        )
-        self._is_fitted = False
-
-    def fit(self, X: np.ndarray):
-        X_scaled = self.scaler.fit_transform(X)
-        self.model.fit(X_scaled, X_scaled)   # reconstruction target = input
-        self._is_fitted = True
-        return self
-
-    def reconstruction_error(self, X: np.ndarray) -> np.ndarray:
-        X_scaled = self.scaler.transform(X)
-        recon    = self.model.predict(X_scaled)
-        return np.mean((X_scaled - recon) ** 2, axis=1)
+        def get_latent(self, x_cont: torch.Tensor, x_cat: torch.Tensor) -> torch.Tensor:
+            """Extract bottleneck representation only (for visualisation)."""
+            with torch.no_grad():
+                x_norm = self.cont_bn(x_cont)
+                x_emb  = self._embed_all(x_cat)
+                x_in   = torch.cat([x_norm, x_emb], dim=1)
+                return self.bottleneck_act(self.bottleneck(self.encoder(x_in)))
 
 
-# ── Main Autoencoder Trainer / Scorer ────────────────────────────────────────
 
 class AutoencoderDetector:
-    """
-    High-level interface for training and scoring the autoencoder.
-    Handles both PyTorch (full embeddings) and sklearn (fallback) backends.
-    """
-
-    def __init__(self, epochs=50, batch_size=64, lr=1e-3,
-                 cont_loss_weight=0.6, cat_loss_weight=0.1,
-                 device: Optional[str] = None):
+    def __init__(
+        self,
+        epochs: int = 60,
+        batch_size: int = 128,
+        lr: float = 1e-3,
+        bottleneck_dim: int = 16,
+        dropout: float = 0.1,
+        cont_loss_weight: float = 0.5,
+        cat_loss_weight: float = 0.1,
+        patience: int = 12,
+        device: Optional[str] = None,
+        continuous_features: Optional[List[str]] = None,
+    ):
         self.epochs           = epochs
         self.batch_size       = batch_size
         self.lr               = lr
+        self.bottleneck_dim   = bottleneck_dim
+        self.dropout          = dropout
         self.cont_loss_weight = cont_loss_weight
         self.cat_loss_weight  = cat_loss_weight
-        self.vocabs           = None
-        self.model            = None
+        self.patience         = patience
+        self.cont_feats       = continuous_features
+
+        self._vocabs          = None
+        self._scaler          = None
+        self._model           = None
+        self._sklearn_ae      = None
         self._is_fitted       = False
+        self._threshold       = None   # 95th pct recon error on fit window
+        self._train_error_min = None
+        self._train_error_max = None
         self._use_torch       = TORCH_AVAILABLE
-        self._recon_threshold = None   # 95th percentile on fit window
+        self._actual_cont_feats: List[str] = []  # features actually present in data
 
-        if TORCH_AVAILABLE:
-            self.device = torch.device(
-                device if device else ("cuda" if torch.cuda.is_available() else "cpu")
-            )
-            print(f"[Autoencoder] Using device: {self.device}")
+        if device:
+            self.device = torch.device(device)
+        elif torch.cuda.is_available():
+            self.device = torch.device("cuda")
         else:
-            print("[Autoencoder] PyTorch not available — using sklearn fallback.")
+            self.device = torch.device("cpu")
+        print(f"[AutoencoderDetector] Backend: PyTorch | Device: {self.device}")
 
-    def _prepare_arrays(self, df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
-        """
-        Extract (X_continuous, X_categorical) arrays from DataFrame.
-        Rows with parse_success=False are kept but NaN-filled.
-        """
-        cont_cols = [c for c in CONTINUOUS_FEATURES if c in df.columns]
-        X_cont = df[cont_cols].fillna(0).values.astype(np.float32)
+    def _resolve_continuous_features(self, df: pd.DataFrame) -> List[str]:
+        """Return features from config list that actually exist in df, non-NaN > 50%."""
+        available = []
+        for f in self.cont_feats:
+            if f in df.columns:
+                nan_rate = df[f].isna().mean()
+                if nan_rate < 0.50:
+                    available.append(f)
+        return available
 
-        # Normalize continuous features
-        if hasattr(self, '_cont_scaler') and self._cont_scaler is not None:
-            X_cont = self._cont_scaler.transform(X_cont)
+    def _get_X_cont(self, df: pd.DataFrame, fit: bool = False) -> np.ndarray:
+        """Extract and scale continuous feature matrix. NaN → 0 after scaling."""
+        X = df[self._actual_cont_feats].copy()
+        X = X.fillna(0).replace([np.inf, -np.inf], 0).values.astype(np.float32)
+        if fit:
+            return self._scaler.fit_transform(X).astype(np.float32)
+        return self._scaler.transform(X).astype(np.float32)
 
-        cat_idx_cols = [f"{col}_idx" for col in CATEGORICAL_COLS if f"{col}_idx" in df.columns]
-        X_cat = df[cat_idx_cols].fillna(0).values.astype(np.int64) if cat_idx_cols else np.zeros((len(df), 1), dtype=np.int64)
-
-        return X_cont, X_cat
+    def _get_X_cat(self, df: pd.DataFrame) -> np.ndarray:
+        enc = encode_categoricals(df, self._vocabs)
+        cols = []
+        for col, cfg in CATEGORICAL_EMBEDDING_CONFIG.items():
+            cols.append(enc[f"{col}_idx"].values)
+            if cfg["lag_col"]:
+                cols.append(enc[f"{cfg['lag_col']}_idx"].values)
+        return np.stack(cols, axis=1).astype(np.int64)
 
     def fit(self, fit_df: pd.DataFrame) -> "AutoencoderDetector":
-        """
-        Fit the autoencoder on the fit window.
-        Steps:
-          1. Build vocabularies from fit_df
-          2. Encode categoricals to integer indices
-          3. Scale continuous features
-          4. Train the autoencoder
-          5. Compute reconstruction error threshold (95th percentile)
-        """
         from sklearn.preprocessing import StandardScaler
         from sklearn.model_selection import train_test_split
 
-        train_df = fit_df[fit_df["parse_success"] == True].copy()
+        train_df = fit_df.copy()
+        print(f"\n[AutoencoderDetector] Fitting on {len(train_df)} rows...")
 
-        # Step 1 & 2: Vocabularies + encoding
-        self.vocabs  = build_vocabularies(train_df)
-        train_df     = encode_categoricals(train_df, self.vocabs)
+        # Step 1 — Continuous features
+        self._scaler            = StandardScaler()
+        self._actual_cont_feats = self._resolve_continuous_features(train_df)
+        print(f"  Continuous features : {len(self._actual_cont_feats)}")
 
-        # Step 3: Fit continuous scaler
-        self._cont_scaler = StandardScaler()
-        cont_cols = [c for c in CONTINUOUS_FEATURES if c in train_df.columns]
-        self._cont_scaler.fit(train_df[cont_cols].fillna(0).values)
-        self.cont_cols = cont_cols
+        # Step 2 — Vocabularies
+        print("  Building vocabularies...")
+        self._vocabs = build_vocabularies(train_df)
 
-        X_cont, X_cat = self._prepare_arrays(train_df)
+        # Step 3 & 4 — Encode and scale
+        X_cont = self._get_X_cont(train_df, fit=True)
+        X_cat  = self._get_X_cat(train_df)
 
         if self._use_torch:
-            self._fit_torch(X_cont, X_cat, train_df)
-        else:
-            self._fit_sklearn(X_cont)
+            self._fit_torch(X_cont, X_cat)
 
-        # Step 5: Compute threshold on fit window
-        errors = self._compute_errors(train_df)
-        self._recon_threshold = float(np.percentile(errors, 95))
-        self._is_fitted = True
+        # Step 6 — Threshold
+        # Step 6 — Threshold and training score range
+        errors = self._compute_errors_from_arrays(X_cont, X_cat)
+        self._threshold       = float(np.percentile(errors, 95))
+        self._train_error_min = float(errors.min())
+        self._train_error_max = float(errors.max())
+        self._is_fitted       = True
 
-        print(f"[Autoencoder] Fitted. Reconstruction error threshold (95th pct): "
-              f"{self._recon_threshold:.4f}")
+        print(f"  Recon error threshold (95th pct): {self._threshold:.6f}")
+        print(f"  Training error range: [{self._train_error_min:.6f}, {self._train_error_max:.6f}]")
         return self
 
-    def _fit_torch(self, X_cont: np.ndarray, X_cat: np.ndarray, train_df: pd.DataFrame):
-        """Full PyTorch training loop."""
-        from sklearn.model_selection import train_test_split
-
-        vocab_sizes = {col: len(v) for col, v in self.vocabs.items()}
+    def _fit_torch(self, X_cont: np.ndarray, X_cat: np.ndarray):
+        """Full PyTorch training with early stopping."""
         n_continuous = X_cont.shape[1]
+        vocab_sizes  = {col: len(v) for col, v in self._vocabs.items()}
 
-        self.model = FraudAutoencoder(
+        self._model = FraudAutoencoder(
             n_continuous=n_continuous,
             vocab_sizes=vocab_sizes,
+            bottleneck_dim=self.bottleneck_dim,
+            dropout=self.dropout,
         ).to(self.device)
 
-        # Train / validation split within fit window (80/20)
-        idx = np.arange(len(X_cont))
-        tr_idx, val_idx = train_test_split(idx, test_size=0.2, random_state=42)
+        # 80/20 split within fit window for early stopping
+        idx     = np.arange(len(X_cont))
+        tr_idx, val_idx = self._split_train_val(idx)
 
-        train_ds = TransactionDataset(X_cont[tr_idx], X_cat[tr_idx])
-        val_ds   = TransactionDataset(X_cont[val_idx], X_cat[val_idx])
-        train_dl = DataLoader(train_ds, batch_size=self.batch_size, shuffle=True)
-        val_dl   = DataLoader(val_ds,   batch_size=self.batch_size, shuffle=False)
+        tr_ds   = TransactionDataset(X_cont[tr_idx], X_cat[tr_idx])
+        val_ds  = TransactionDataset(X_cont[val_idx], X_cat[val_idx])
+        tr_dl   = DataLoader(tr_ds,  batch_size=self.batch_size, shuffle=True,  drop_last=True)
+        val_dl  = DataLoader(val_ds, batch_size=self.batch_size, shuffle=False)
 
-        optimizer    = torch.optim.Adam(self.model.parameters(), lr=self.lr)
+        optimizer    = torch.optim.Adam(self._model.parameters(), lr=self.lr, weight_decay=1e-5)
+        scheduler    = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer, patience=5, factor=0.5
+        )
         cont_loss_fn = nn.MSELoss()
-        cat_loss_fn  = nn.CrossEntropyLoss(ignore_index=0)  # ignore <UNK>
+        cat_loss_fn  = nn.CrossEntropyLoss(ignore_index=UNK_IDX)
 
-        best_val_loss = float("inf")
-        patience_counter = 0
-        patience = 10
+        best_val     = float("inf")
+        patience_cnt = 0
+        best_state   = None
 
-        print(f"[Autoencoder] Training: {len(train_ds)} train, {len(val_ds)} val rows")
+        print(f"  Training: {len(tr_ds)} train / {len(val_ds)} val | "
+              f"epochs={self.epochs} | batch={self.batch_size}")
 
-        for epoch in range(self.epochs):
-            # ── Training ──
-            self.model.train()
-            train_loss = 0.0
-            for x_cont_batch, x_cat_batch in train_dl:
-                x_cont_batch = x_cont_batch.to(self.device)
-                x_cat_batch  = x_cat_batch.to(self.device)
-
+        for epoch in range(1, self.epochs + 1):
+            # ── Train ─────────────────────────────────────────────────────
+            self._model.train()
+            tr_loss = 0.0
+            for xc, xk in tr_dl:
+                xc, xk = xc.to(self.device), xk.to(self.device)
                 optimizer.zero_grad()
-                recon_cont, recon_cat, _ = self.model(x_cont_batch, x_cat_batch)
-
-                # Continuous reconstruction loss
-                loss = self.cont_loss_weight * cont_loss_fn(recon_cont, x_cont_batch)
-
-                # Categorical reconstruction losses
-                for i, col in enumerate(CATEGORICAL_COLS):
-                    if col in recon_cat:
-                        loss += self.cat_loss_weight * cat_loss_fn(
-                            recon_cat[col], x_cat_batch[:, i]
-                        )
-
+                rc, rk, _ = self._model(xc, xk)
+                loss = self._compute_loss(xc, xk, rc, rk, cont_loss_fn, cat_loss_fn)
                 loss.backward()
+                nn.utils.clip_grad_norm_(self._model.parameters(), max_norm=1.0)
                 optimizer.step()
-                train_loss += loss.item()
+                tr_loss += loss.item()
 
-            # ── Validation ──
-            self.model.eval()
+            # ── Validate ──────────────────────────────────────────────────
+            self._model.eval()
             val_loss = 0.0
             with torch.no_grad():
-                for x_cont_batch, x_cat_batch in val_dl:
-                    x_cont_batch = x_cont_batch.to(self.device)
-                    x_cat_batch  = x_cat_batch.to(self.device)
-                    recon_cont, recon_cat, _ = self.model(x_cont_batch, x_cat_batch)
+                for xc, xk in val_dl:
+                    xc, xk = xc.to(self.device), xk.to(self.device)
+                    rc, rk, _ = self._model(xc, xk)
+                    val_loss += self._compute_loss(
+                        xc, xk, rc, rk, cont_loss_fn, cat_loss_fn
+                    ).item()
 
-                    loss = self.cont_loss_weight * cont_loss_fn(recon_cont, x_cont_batch)
-                    for i, col in enumerate(CATEGORICAL_COLS):
-                        if col in recon_cat:
-                            loss += self.cat_loss_weight * cat_loss_fn(
-                                recon_cat[col], x_cat_batch[:, i]
-                            )
-                    val_loss += loss.item()
+            avg_val = val_loss / max(len(val_dl), 1)
+            scheduler.step(avg_val)
 
-            avg_val = val_loss / len(val_dl)
+            if (epoch % 10) == 0 or epoch == 1:
+                print(f"  Epoch {epoch:3d}/{self.epochs} | "
+                      f"train={tr_loss/len(tr_dl):.5f} | val={avg_val:.5f}")
 
-            if (epoch + 1) % 10 == 0:
-                print(f"  Epoch {epoch+1:3d}/{self.epochs} | "
-                      f"train_loss={train_loss/len(train_dl):.4f} | "
-                      f"val_loss={avg_val:.4f}")
-
-            # Early stopping
-            if avg_val < best_val_loss:
-                best_val_loss = avg_val
-                patience_counter = 0
-                # Save best weights
-                self._best_state = {k: v.clone() for k, v in self.model.state_dict().items()}
+            # ── Early stopping ────────────────────────────────────────────
+            if avg_val < best_val - 1e-6:
+                best_val     = avg_val
+                patience_cnt = 0
+                best_state   = {k: v.clone() for k, v in self._model.state_dict().items()}
             else:
-                patience_counter += 1
-                if patience_counter >= patience:
-                    print(f"  Early stopping at epoch {epoch+1}")
+                patience_cnt += 1
+                if patience_cnt >= self.patience:
+                    print(f"  Early stopping at epoch {epoch} (best val={best_val:.5f})")
                     break
 
-        # Restore best weights
-        if hasattr(self, "_best_state"):
-            self.model.load_state_dict(self._best_state)
-        print(f"[Autoencoder] Training complete. Best val_loss={best_val_loss:.4f}")
+        if best_state:
+            self._model.load_state_dict(best_state)
+        print(f"  Training complete. Best val_loss={best_val:.5f}")
 
-    def _fit_sklearn(self, X_cont: np.ndarray):
-        """Sklearn MLP fallback — no embeddings."""
-        self._sklearn_ae = SklearnAutoencoderFallback()
-        # Note: sklearn fallback has its own internal scaler
-        # We reuse X_cont that was already scaled by _cont_scaler
-        self._sklearn_ae.model.fit(X_cont, X_cont)
-        self._sklearn_ae._is_fitted = True
-        print("[Autoencoder] sklearn fallback training complete.")
+    def _compute_loss(self, xc, xk, rc, rk, cont_fn, cat_fn):
+        """Weighted combined loss: MSE for continuous + CrossEntropy for categoricals."""
+        loss = self.cont_loss_weight * cont_fn(rc, xc)
+        # xk column order: [user_id, city, prev_city, device, prev_device,
+        #                   txn_type, prev_txn_type, currency, prev_currency]
+        col_idx = 0
+        for col, cfg in CATEGORICAL_EMBEDDING_CONFIG.items():
+            targets = xk[:, col_idx]
+            loss   += self.cat_loss_weight * cat_fn(rk[col], targets)
+            col_idx += 1
+            if cfg["lag_col"]:
+                col_idx += 1   # skip lag index for loss (current only)
+        return loss
 
-    def _compute_errors(self, df: pd.DataFrame) -> np.ndarray:
-        """Compute per-row reconstruction error for a DataFrame."""
-        enc_df = encode_categoricals(df, self.vocabs) if self.vocabs else df
-        X_cont, X_cat = self._prepare_arrays(enc_df)
+    def _split_train_val(self, idx: np.ndarray, val_frac: float = 0.20):
+        """Stratified 80/20 split (random, seeded)."""
+        rng = np.random.default_rng(42)
+        rng.shuffle(idx)
+        split = int(len(idx) * (1 - val_frac))
+        return idx[:split], idx[split:]
 
-        if self._use_torch and self.model is not None:
+
+    def score(self, df: pd.DataFrame) -> pd.DataFrame:
+        assert self._is_fitted, "Must call fit() before score()"
+        out = df.copy()
+
+        enc_df = encode_categoricals(df, self._vocabs)
+        X_cont = self._get_X_cont(enc_df, fit=False)
+        X_cat  = self._get_X_cat(enc_df)
+
+        errors = self._compute_errors_from_arrays(X_cont, X_cat)
+
+        out["ae_recon_error"] = errors
+
+        # Normalize using TRAINING error range, not batch range
+        # clip(0, 1): errors larger than training max → 1.0 (very anomalous)
+        out["ae_score"] = np.clip(
+            (errors - self._train_error_min) / (self._train_error_max - self._train_error_min + 1e-9),
+            0.0, 1.0
+        )
+        out["ae_is_anomaly"]  = (errors > self._threshold).astype(int)
+
+        n_flag = out["ae_is_anomaly"].sum()
+        print(f"[AutoencoderDetector] Scored {len(out)} rows. "
+              f"Flagged {n_flag} ({100*n_flag/len(out):.1f}%) "
+              f"above threshold {self._threshold:.6f}")
+        return out
+
+    def _compute_errors_from_arrays(
+        self, X_cont: np.ndarray, X_cat: np.ndarray
+    ) -> np.ndarray:
+        """Compute per-row reconstruction MSE."""
+        if self._use_torch and self._model is not None:
             return self._torch_recon_error(X_cont, X_cat)
-        elif hasattr(self, "_sklearn_ae"):
-            return self._sklearn_ae.reconstruction_error(X_cont)
-        else:
-            return np.zeros(len(df))
+        return np.zeros(len(X_cont))
 
-    def _torch_recon_error(self, X_cont: np.ndarray, X_cat: np.ndarray) -> np.ndarray:
-        """Per-row reconstruction MSE from the PyTorch model."""
-        self.model.eval()
-        errors = []
+    def _torch_recon_error(
+        self, X_cont: np.ndarray, X_cat: np.ndarray
+    ) -> np.ndarray:
+        """Batch reconstruction MSE from PyTorch model."""
+        self._model.eval()
+        errors  = []
         dataset = TransactionDataset(X_cont, X_cat)
-        loader  = DataLoader(dataset, batch_size=256, shuffle=False)
+        loader  = DataLoader(dataset, batch_size=512, shuffle=False)
 
         with torch.no_grad():
-            for x_cont_b, x_cat_b in loader:
-                x_cont_b = x_cont_b.to(self.device)
-                x_cat_b  = x_cat_b.to(self.device)
-                recon_cont, _, _ = self.model(x_cont_b, x_cat_b)
-                # Per-row MSE on continuous features
-                mse = torch.mean((recon_cont - x_cont_b) ** 2, dim=1)
+            for xc, xk in loader:
+                xc, xk = xc.to(self.device), xk.to(self.device)
+                rc, _, _ = self._model(xc, xk)
+                mse = torch.mean((rc - xc) ** 2, dim=1)
                 errors.extend(mse.cpu().numpy())
 
-        return np.array(errors)
+        return np.array(errors, dtype=np.float32)
 
     def get_per_feature_recon_error(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Returns a DataFrame of per-feature reconstruction errors.
-        Used for explainability: which feature was hardest to reconstruct?
-        """
-        if not (self._use_torch and self.model is not None):
+        if not (self._use_torch and self._model is not None):
             return pd.DataFrame()
 
-        enc_df = encode_categoricals(df, self.vocabs)
-        X_cont, X_cat = self._prepare_arrays(enc_df)
+        enc_df = encode_categoricals(df, self._vocabs)
+        X_cont = self._get_X_cont(enc_df, fit=False)
+        X_cat  = self._get_X_cat(enc_df)
 
-        self.model.eval()
+        self._model.eval()
         all_errors = []
         dataset = TransactionDataset(X_cont, X_cat)
-        loader  = DataLoader(dataset, batch_size=256, shuffle=False)
+        loader  = DataLoader(dataset, batch_size=512, shuffle=False)
 
         with torch.no_grad():
-            for x_cont_b, x_cat_b in loader:
-                x_cont_b = x_cont_b.to(self.device)
-                x_cat_b  = x_cat_b.to(self.device)
-                recon_cont, _, _ = self.model(x_cont_b, x_cat_b)
-                feat_err = (recon_cont - x_cont_b) ** 2   # (batch, n_features)
+            for xc, xk in loader:
+                xc, xk = xc.to(self.device), xk.to(self.device)
+                rc, _, _ = self._model(xc, xk)
+                feat_err = (rc - xc) ** 2   # (batch, n_features)
                 all_errors.append(feat_err.cpu().numpy())
 
         feat_errors = np.concatenate(all_errors, axis=0)
-        cont_cols = [c for c in CONTINUOUS_FEATURES if c in df.columns]
-        return pd.DataFrame(feat_errors, columns=cont_cols[:feat_errors.shape[1]])
+        return pd.DataFrame(feat_errors, columns=self._actual_cont_feats,
+                            index=df.index)
+
+    def get_categorical_recon_accuracy(self, df: pd.DataFrame) -> pd.DataFrame:
+        if not (self._use_torch and self._model is not None):
+            return pd.DataFrame()
+
+        enc_df = encode_categoricals(df, self._vocabs)
+        X_cont = self._get_X_cont(enc_df, fit=False)
+        X_cat  = self._get_X_cat(enc_df)
+
+        self._model.eval()
+        all_correct = {col: [] for col in CATEGORICAL_EMBEDDING_CONFIG}
+
+        dataset = TransactionDataset(X_cont, X_cat)
+        loader  = DataLoader(dataset, batch_size=512, shuffle=False)
+
+        col_idx = 0
+        col_positions = {}
+        for col, cfg in CATEGORICAL_EMBEDDING_CONFIG.items():
+            col_positions[col] = col_idx
+            col_idx += 1
+            if cfg["lag_col"]:
+                col_idx += 1
+
+        with torch.no_grad():
+            for xc, xk in loader:
+                xc, xk = xc.to(self.device), xk.to(self.device)
+                _, rk, _ = self._model(xc, xk)
+                for col, logits in rk.items():
+                    predicted = logits.argmax(dim=1)
+                    actual    = xk[:, col_positions[col]]
+                    correct   = (predicted == actual).cpu().numpy()
+                    all_correct[col].extend(correct.tolist())
+
+        result = pd.DataFrame({
+            f"{col}_recon_correct": vals
+            for col, vals in all_correct.items()
+        }, index=df.index)
+        return result
 
     def get_user_embeddings(self, df: pd.DataFrame) -> Optional[pd.DataFrame]:
-        """
-        Extract learned user_id embedding vectors.
-        Useful for visualizing user behavioral clusters.
-        Returns DataFrame with user_id and embedding dimensions.
-        """
-        if not (self._use_torch and self.model is not None and self.vocabs):
+        if not (self._use_torch and self._model is not None):
             return None
 
-        enc_df = encode_categoricals(df, self.vocabs)
-        unique_users = enc_df[["user_id", "user_id_idx"]].drop_duplicates()
+        enc_df   = encode_categoricals(df, self._vocabs)
+        unique   = enc_df[["user_id", "user_id_idx"]].drop_duplicates()
+        indices  = torch.LongTensor(unique["user_id_idx"].values).to(self.device)
 
-        indices = torch.LongTensor(unique_users["user_id_idx"].values).to(self.device)
+        self._model.eval()
         with torch.no_grad():
-            embs = self.model.get_embeddings("user_id", indices).cpu().numpy()
+            embs = self._model.embeddings["user_id"](indices).cpu().numpy()
 
         emb_df = pd.DataFrame(
             embs,
             columns=[f"user_emb_{i}" for i in range(embs.shape[1])]
         )
-        emb_df.insert(0, "user_id", unique_users["user_id"].values)
+        emb_df.insert(0, "user_id", unique["user_id"].values)
         return emb_df
 
-    def score(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Score all transactions. Adds ae_recon_error and ae_score columns.
-        """
-        assert self._is_fitted
+    def get_latent_representations(self, df: pd.DataFrame) -> Optional[np.ndarray]:
+        if not (self._use_torch and self._model is not None):
+            return None
 
-        # Encode categoricals using fit-window vocabulary (<UNK> for unseen)
-        score_df = encode_categoricals(df, self.vocabs)
-        errors   = self._compute_errors(score_df)
+        enc_df = encode_categoricals(df, self._vocabs)
+        X_cont = self._get_X_cont(enc_df, fit=False)
+        X_cat  = self._get_X_cat(enc_df)
 
-        out = df.copy()
-        out["ae_recon_error"] = errors
-        # Normalize to [0,1]
-        mn, mx = errors.min(), errors.max()
-        out["ae_score"] = (errors - mn) / (mx - mn + 1e-9)
-        out["ae_is_anomaly"] = (errors > self._recon_threshold).astype(int)
+        self._model.eval()
+        latents  = []
+        dataset  = TransactionDataset(X_cont, X_cat)
+        loader   = DataLoader(dataset, batch_size=512, shuffle=False)
 
-        n = out["ae_is_anomaly"].sum()
-        print(f"[Autoencoder] Flagged {n}/{len(out)} ({100*n/len(out):.1f}%) "
-              f"above recon threshold {self._recon_threshold:.4f}")
-        return out
+        with torch.no_grad():
+            for xc, xk in loader:
+                xc, xk = xc.to(self.device), xk.to(self.device)
+                z = self._model.get_latent(xc, xk)
+                latents.append(z.cpu().numpy())
+
+        return np.concatenate(latents, axis=0)
+
+    @property
+    def is_fitted(self) -> bool:
+        return self._is_fitted
+
+    @property
+    def feature_count(self) -> int:
+        return len(self._actual_cont_feats)
+
+    @property
+    def continuous_features(self) -> List[str]:
+        return list(self._actual_cont_feats)
+
+    @property
+    def vocab_sizes(self) -> Optional[Dict[str, int]]:
+        if self._vocabs is None:
+            return None
+        return {col: len(v) for col, v in self._vocabs.items()}
+
+    @property
+    def threshold(self) -> Optional[float]:
+        return self._threshold
