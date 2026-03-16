@@ -23,9 +23,9 @@
 
 ## 1. Project Overview
 
-This project builds an end-to-end **unsupervised fraud detection pipeline** for Moniepoint, detecting anomalous transactions across 8,876 raw transaction logs from 86 users spanning June–July 2025.
+Build an end-to-end **unsupervised fraud detection pipeline**, detecting anomalous transactions across 8,876 raw transaction logs from 86 users spanning June–July 2025.
 
-**The core challenge** is that no fraud labels exist. The pipeline must identify suspicious behaviour purely from statistical deviation and expert-encoded rules, without any ground truth to train or validate against in the conventional sense.
+**The core challenge** is that no fraud labels exist. The pipeline must identify suspicious behaviour purely from statistical deviation and rules, without any ground truth to train or validate against in the conventional sense.
 
 **Architecture overview:**
 
@@ -57,7 +57,7 @@ This project builds an end-to-end **unsupervised fraud detection pipeline** for 
 ```
 fraud_detection/
 ├── data/
-│   ├── raw_logs.csv                    # Raw input (8,876 transaction logs)
+│   ├── MP Fraud Takehome Task 2026 - Sheet1.csv                    # Raw input (8,876 transaction logs)
 │   ├── processed/
 │   │   └── processed_logs.csv          # Output of parser (7,774 rows)
 │   ├── featured/
@@ -71,7 +71,7 @@ fraud_detection/
 │   ├── parser/
 │   │   └── log_parser.py               # 4-layer cascade parser
 │   ├── features/
-│   │   └── feature_engine.py           # FraudFeatureEngine (268 features, 15 groups)
+│   │   └── feature_engineer.py           # FraudFeatureEngine (268 features, 15 groups)
 │   ├── models/
 │   │   ├── rule_engine.py              # 10 deterministic fraud rules
 │   │   ├── isolation_forest.py         # IsolationForestDetector
@@ -85,27 +85,10 @@ fraud_detection/
 │       └── visualiser.py               # 9 chart functions
 │
 ├── notebooks/
-│   ├── fraud_detection.ipynb           # Main pipeline (training + evaluation)
-│   ├── pre_eda.ipynb                   # Exploratory data analysis
-│   ├── inference_explainability.ipynb  # Inference + explanation interface
-│   └── explainability.ipynb            # Top-50 anomaly visualisations
-│
-├── outputs/
-│   ├── model_artifacts/                # Saved model weights and metadata
-│   │   ├── if_model.joblib
-│   │   ├── if_scaler.joblib
-│   │   ├── if_shap_explainer.joblib
-│   │   ├── if_meta.json
-│   │   ├── ae_scaler.joblib
-│   │   ├── ae_sklearn_model.joblib
-│   │   ├── ae_meta.json
-│   │   └── ensemble_scorer.json
-│   ├── top_anomaly_reports.txt         # NL fraud reports for top-10 transactions
-│   └── top_50_anomalies.csv
-│
-└── app.py                              # Streamlit inference dashboard
+│   ├── fraud_detection.ipynb           # Main pipeline (Parsing + Feature engineering + training + evaluation + explanability)
+│   ├── model_artifacts/
+|   └── top_50_anomalies.csv
 ```
-
 ---
 
 ## 3. Setup & Installation
@@ -118,16 +101,14 @@ fraud_detection/
 ### Install dependencies
 
 ```bash
-pip install pandas numpy scikit-learn scipy matplotlib seaborn shap
-pip install torch torchvision          # Optional: for full autoencoder (sklearn fallback works without)
-pip install streamlit                  # Optional: for the dashboard
-pip install spacy
+pip install -r requirements.txt
+pip install -e .
 python -m spacy download en_core_web_sm
 ```
 
 ### Data placement
 
-Place the raw CSV at `data/raw_logs.csv`. The expected column is `raw_log` containing one transaction log string per row.
+Place the raw CSV at `data/MP Fraud Takehome Task 2026 - Sheet1.csv`. The expected column is `raw_log` containing one transaction log string per row.
 
 ---
 
@@ -137,85 +118,29 @@ All steps are in `notebooks/fraud_detection.ipynb`. Run cells sequentially.
 
 ### Step-by-step
 
-**Step 1 — Parse raw logs** *(Cells 4–8)*
-```python
-from src.parser.log_parser import LogParser
-parser = LogParser()
-parsed_df = parser.parse_dataframe(raw_df, log_col="raw_log")
-```
-Output: `data/processed/processed_logs.csv`
-
-**Step 2 — EDA** *(Cells 9–37)*  
+**Step 1 — Parse raw logs**
+**Step 2 — EDA**  
 Exploratory analysis to understand data quality and calibrate rule thresholds. Not required for re-running the pipeline; informational only.
-
-**Step 3 — Feature engineering** *(Cells 38–44)*
-```python
-engine = FraudFeatureEngine(fit_df)       # Fit on 80% time split
-featured_df = engine.transform(score_df)  # Transform full dataset
-```
-Output: `data/featured/featured_df.csv`
-
-**Step 4 — Rule engine** *(Cells 48–51)*
-```python
-ruled_df = apply_rules(featured_df)
-```
-
-**Step 5 — Isolation Forest** *(Cells 52–66)*
-```python
-if_detector = IsolationForestDetector(contamination=0.03, n_estimators=200)
-if_detector.fit(fit_df)
-if_scored_df = if_detector.score(ruled_df)
-save_isolation_forest(if_detector)
-```
-
-**Step 6 — Autoencoder** *(Cells 67–76)*
-```python
-ae_train = fit_df[fit_df["rule_flag_count"] == 0]  # Train on rule-clean data only
-ae_detector = AutoencoderDetector(epochs=60, bottleneck_dim=16)
-ae_detector.fit(ae_train)
-ae_scored_df = ae_detector.score(if_scored_df)
-save_autoencoder(ae_detector)
-```
-
-**Step 7 — Ensemble scoring** *(Cells 78–83)*
-```python
-ensemble_scorer = fit_ensemble(ae_scored_df)  # Freezes normalization from training data
-final_df = ensemble_scorer.score(ae_scored_df)
-save_ensemble_scorer(ensemble_scorer)
-```
-
-**Step 8 — Evaluation** *(Cells 84–94)*
-```python
-eval_results = run_full_evaluation(final_df, if_detector, ae_detector)
-```
-
-**Step 9 — Explainability** *(Cells 96–104)*
-```python
-reports = generate_batch_reports(final_df, feature_names, shap_matrix)
-```
-
+**Step 3 — Feature engineering**
+**Step 4 — Rule engine** 
+**Step 5 — Isolation Forest** 
+**Step 6 — Autoencoder** 
+**Step 7 — Ensemble scoring** 
+**Step 8 — Evaluation**
+**Step 9 — Explainability**
+### All the visulaisations can be seen in the notebook
 ### Important note on online scoring
-
-Because feature engineering uses pandas rolling windows and groupby operations (30-day means, velocity counts, etc.), a new transaction **cannot be scored in isolation**. It must be appended to the historical dataset before calling `engine.transform()`, and only the new row's features extracted afterwards. See `src/explainability/explainer.py` (`score_and_explain_single`) and `inference_explainability.ipynb` for the correct implementation.
-
+Because feature engineering uses pandas rolling windows and groupby operations (30-day means, velocity counts, etc.), a new transaction **cannot be scored in isolation**. It must be appended to the historical dataset before calling `engine.transform()`, and only the new row's features extracted afterwards. See `src/explainability/explainer.py` (`score_and_explain_single`) for the correct implementation.
 ---
 
 ## 5. Pipeline Logic
-
 ### 5.1 Log Parsing
-
-> **Notebook reference:** Cell 5 (architecture description), Cells 6–7 (implementation), Cell 15 (parse quality findings)
-
+> **Notebook reference:**
 **Problem:** The raw dataset contains 8,876 transaction logs in 8 structurally distinct formats — colon-delimited, pipe-delimited, natural language sentences, ATM-style, shorthand formats, and unrecognised/malformed entries. No single regex covers them all.
-
 **Solution — 4-layer cascade parser:**
-
 1. **Regex cascade (F1–F7):** Seven compiled patterns, tried in order of specificity. Each pattern captures user_id, timestamp, txn_type, amount, currency, city, and device. When a pattern matches all required fields, the row is accepted and no further layers are tried.
-
 2. **Heuristic fallback:** For rows not matched by any regex, a field-by-field micro-pattern extractor attempts to recover individual fields independently. This handles partially-formatted logs where the structure is inconsistent but fragments are recognisable.
-
 3. **spaCy EntityRuler:** A custom NLP entity recogniser is applied to logs that failed heuristic extraction. Custom rules recognise UK city names, device patterns, currency symbols, and monetary amounts from free-text descriptions.
-
 4. **LLM fallback (optional):** For logs that fail all three deterministic layers, an LLM can be invoked. This layer was not required for this dataset.
 
 **Parse results:**
@@ -229,11 +154,10 @@ Because feature engineering uses pandas rolling windows and groupby operations (
 
 ### 5.2 Feature Engineering
 
-> **Notebook reference:** Cell 38 (architecture and leakage-prevention principles), Cells 39–44 (implementation), Cell 37 (EDA-driven decisions)
-
+> **Notebook reference:**
 **Point-in-time correctness:** All features are computed with `closed='left'` on rolling windows, ensuring no transaction can access information from its own row or any future row. The dataset is sorted by `(user_id, timestamp)` before any aggregate is computed.
-
-**Feature groups (268 total across 15 groups):**
+> 
+**Feature groups (246 total across 12 groups):**
 
 | Group | Features | Examples |
 |---|---|---|
@@ -245,13 +169,10 @@ Because feature engineering uses pandas rolling windows and groupby operations (
 | F — Behavioural Fingerprint | 16 | user_device_prior_count, city_global_rarity, user_n_distinct_cities |
 | G — Geographic | 8 | is_new_city, impossible_travel, city_transition_rarity |
 | H — Device | 5 | is_new_device, device_global_rarity, new_device_and_new_city |
-| I — Currency | 4 | is_currency_missing, currency_city_mismatch |
 | J — Sequence/Lag | 10 | prev_amount, prev_city, time_since_last_txn_sec |
 | K — Interaction | 15 | new_city_x_amt_zscore, impossible_travel_x_amt |
 | L — Missingness | 6 | missing_field_count, is_both_geo_dev_missing |
-| M — Affinity/Velocity Dev | 8 | velocity_ratio_1h_vs_30D_baseline |
-| N — Burst Detection | 7 | is_burst_5min, consecutive_bursts |
-| O — Amount Trend | 5 | is_amount_escalating |
+| M — Burst Detection | 7 | is_burst_5min, consecutive_bursts |
 
 **Key design decisions from EDA:**
 
@@ -268,9 +189,6 @@ Because feature engineering uses pandas rolling windows and groupby operations (
 ---
 
 ### 5.3 Anomaly Detection Models
-
-> **Notebook reference:** Cells 48–51 (rule engine), Cells 52–66 (Isolation Forest), Cells 67–76 (Autoencoder)
-
 The pipeline uses three independent detectors whose outputs are combined. Independence is critical — if all models shared the same signal, the ensemble would add no value. Cross-model Spearman rank correlations are all below 0.3, confirming meaningful independence.
 
 #### Layer 1 — Rule Engine
@@ -281,14 +199,10 @@ Ten deterministic rules, each encoding a specific fraud pattern observed in real
 |---|---|---|---|
 | R01_AMOUNT_SPIKE_30D | Amount z-score vs user 30D mean | z > 2.5 | EDA: p99 z-score = 3.8 for genuine anomalies |
 | R02_IMPOSSIBLE_TRAVEL | New city within short time gap | gap < 600s | 0.45% of transactions; strong precision signal |
-| R03_VELOCITY_BURST_1H | Transaction count in past hour | ≥ 3 | Card testing pattern |
+| R03_VELOCITY_BURST_1H | Transaction count in past hour | ≥ 2 | Card testing pattern |
 | R04_NEW_CITY_HIGH_AMOUNT | First visit to city AND high amount | z > 2.0 | Combined signal reduces false positives from 8.9% to 0.55% |
 | R05_NEW_DEVICE_HIGH_AMOUNT | First device use AND high amount | z > 2.0 | Device takeover + large withdrawal |
-| R06_NEW_CITY_AND_NEW_DEVICE | Simultaneous new city + new device | both = 1 | Strongest account compromise signal |
-| R07_MISSING_METADATA | Both city AND device unknown | both UNKNOWN | Proxy/VPN usage pattern |
-| R08_AMOUNT_SUM_VELOCITY_1H | Total value in past hour | sum > 2× user mean | High-value card testing |
-| R09_AMOUNT_SPIKE_VS_PREV | Ratio vs immediately prior transaction | ratio > 8× | Abrupt escalation pattern |
-| R10_CURRENCY_MISMATCH | Currency inconsistent with city | mismatch + z > 2.0 | Synthetic data artefact; real signal in production |
+| R06_MISSING_METADATA | Both city AND device unknown | both UNKNOWN | Proxy/VPN usage pattern |
 
 **Design rationale:** Rules are **user-context-aware**, not global. R01 fires based on each user's own 30-day mean, not a fixed amount threshold. This prevents wealthy users from being unfairly flagged and ensures the rules are robust to the near-uniform amount distribution in this dataset.
 
@@ -305,7 +219,7 @@ Ten deterministic rules, each encoding a specific fraud pattern observed in real
 
 **Architecture:** Fitted on the 80th-percentile time split of rule-scored data. Features exclude categorical raw columns (city, device as strings) — these are represented through behavioural fingerprint features (rarity scores, prior counts) which preserve the signal in continuous form suitable for tree splits.
 
-**Score normalization (Pattern 2 — Training-anchored):** The raw IF decision function is normalized using the min/max of the training window's raw scores, not the incoming batch. This ensures that scoring a single new transaction produces the same score it would receive alongside the full training set. The training range is frozen and saved as `if_meta.json`.
+**Score normalization:** The raw IF decision function is normalized using the min/max of the training window's raw scores, not the incoming batch. This ensures that scoring a single new transaction produces the same score it would receive alongside the full training set. The training range is frozen and saved as `if_meta.json`.
 
 #### Layer 3 — Deep Autoencoder
 
@@ -325,50 +239,24 @@ Ten deterministic rules, each encoding a specific fraud pattern observed in real
 
 ### 5.4 Hyperparameter Tuning
 
-> **Notebook reference:** Cells 55–63 (IF tuning), Cell 64 (note on AE tuning)
-
 #### Isolation Forest — Bimodality Coefficient objective
 
 The fundamental challenge of unsupervised anomaly detection hyperparameter tuning is that there are no labels to optimise against. We use the **Bimodality Coefficient (BC)** of the IF score distribution as a proxy objective.
 
 **Rationale:** A good anomaly detector should produce a bimodal score distribution — a large normal cluster near 0 and a small anomaly tail near 1. The BC measures this: BC > 0.555 indicates bimodality. A model producing a uniform or unimodal score distribution has failed to find meaningful structure.
 
-```
-BC = (skewness² + 1) / (kurtosis + 3*(n-1)² / ((n-2)*(n-3)))
-BC > 0.555 → bimodal distribution (model found meaningful separation)
-```
-
-**Search grid:**
-```python
-param_grid = {
-    "contamination": [0.02, 0.03, 0.04, 0.05],
-    "n_estimators":  [100, 200, 300],
-    "max_samples":   [0.7, 0.8],
-    "max_features":  [0.7, 1.0]
-}
-```
-Best configuration achieved BC = 0.628 (bimodal).
-
 #### Autoencoder — Validation Loss objective
 
 For the autoencoder, validation loss from early stopping is the natural tuning objective. The model is trained on rule-clean data with an 80/20 time-based train/validation split. Lower validation loss means the model better reconstructs normal transactions, which sharpens the reconstruction-error signal for anomalies.
-
-Search space: `{bottleneck_dim, dropout, cont_loss_weight}`. The sklearn MLP fallback was used for this dataset as PyTorch was not available; the sklearn fallback uses held-out MSE as the equivalent proxy.
-
-> **Note (Cell 64):** BC for the autoencoder was already 0.790 with default parameters, indicating the architecture itself provides strong separation. Tuning was therefore not applied to the final model.
-
 ---
 
 ### 5.5 Ensemble Scoring & Risk Tiering
-
-> **Notebook reference:** Cell 78 (design rationale), Cells 79–83 (implementation and visualisations)
-
 **Ensemble formula:**
 ```
 final_risk_score = 0.33 × rule_score_norm + 0.33 × if_score_norm + 0.34 × ae_score_norm
 ```
 
-**Equal weights as principled default:** Weights are equal because no analyst feedback is available to calibrate them. The mathematically correct approach is to assign equal weights when you have no information about the relative reliability of each detector. Once analyst-reviewed labels accumulate (see Section 7), weights should be tuned via precision-at-K optimisation.
+**Equal weights as default:** Weights are equal because no analyst feedback is available to calibrate them. The mathematically correct approach is to assign equal weights when you have no information about the relative reliability of each detector. Once analyst-reviewed labels accumulate (see Section 7), weights should be tuned via precision-at-K optimisation.
 
 **Score normalization — frozen training ranges:** Each individual score is normalized against the training data distribution before weighting, not against the incoming batch. This is critical for production stability. Normalising within a batch means the highest-scoring transaction in any batch always gets score 1.0, which is meaningless for a single-transaction query. The `EnsembleScorer` class holds frozen normalization parameters and tier thresholds computed from the training distribution.
 
@@ -379,40 +267,29 @@ final_risk_score = 0.33 × rule_score_norm + 0.33 × if_score_norm + 0.34 × ae_
 
 These thresholds are stored in `ensemble_scorer.json` and reused at inference time.
 
-**Cross-model independence (Cell 83):** Spearman rank correlations between IF, AE, and Rule scores are all below 0.3 (IF↔AE = 0.136, IF↔Rules = 0.133, AE↔Rules = 0.257). Low correlation confirms that each detector captures different fraud signals, validating the ensemble approach.
+**Cross-model independence:** Spearman rank correlations between IF, AE, and Rule scores are all below 0.3 (IF↔AE = 0.598, IF↔Rules = 0.173, AE↔Rules = 0.099). Low correlation confirms that each detector captures different fraud signals, validating the ensemble approach.
 
 ---
 
 ### 5.6 Evaluation
 
-> **Notebook reference:** Cell 89 (strategy overview), Cells 90–94 (implementation)
-
 Because no ground-truth labels exist, the evaluation uses four complementary proxy metrics:
 
 **1. Score Distribution Analysis (BC)**
 - Bimodality Coefficient > 0.555 indicates the model found meaningful structure
-- Results: Rule Engine BC = 0.628 ✅, Autoencoder BC = 0.790 ✅, IF BC = 0.498 ⚠ (IF is expected to produce a less bimodal distribution due to its path-length mechanics)
-
-**2. Synthetic Injection Recall**
-- 120 synthetic fraud transactions (20 per pattern × 6 fraud patterns) are injected into the dataset
-- The pipeline is re-scored on the combined data
-- Recall@K = recovered / min(K, N_injected) — the correct normalisation, which accounts for the physical impossibility of finding more than K anomalies in a top-K list
-- Results: Recall@100 = 0.29 / max achievable 0.83 (35% of maximum), NDCG@100 = 0.291, Average Precision = 0.180
+- Results: Rule Engine BC = 0.774 ✅, Autoencoder BC = 0.995 ✅, IF BC = 0.462 ⚠ (IF is expected to produce a less bimodal distribution due to its path-length mechanics)
 
 **3. Proxy Precision@K**
 - Multi-model agreement (≥ 2 models flagging) is used as a pseudo-label
-- Precision@10 = 0.90, Precision@25 = 0.80
+- Precision@50 = 0.96
 
 **4. Model Stability (CSI)**
 - CSI (Characteristic Stability Index) comparing the first 80% vs last 20% of the dataset by timestamp
 - CSI < 0.10 = stable, 0.10–0.25 = monitor, > 0.25 = recalibrate
-- Results: all model scores show CSI < 0.10, indicating stable scoring across the full two-month period
-
+- Results: all model scores show CSI < 0.2, indicating need strict monitoring over time.
 ---
 
 ### 5.7 Explainability
-
-> **Notebook reference:** Cell 96 (overview), Cells 97–104 (implementation)
 
 For each high-risk transaction, the pipeline produces a structured **Fraud Investigation Report** combining four evidence sources:
 
@@ -421,19 +298,9 @@ For each high-risk transaction, the pipeline produces a structured **Fraud Inves
 2. **SHAP feature importances** — which features of the Isolation Forest's decision contributed most to the anomaly score. Positive SHAP = pushed toward anomalous; negative SHAP = pushed toward normal.
 
 3. **Autoencoder reconstruction error** — which continuous and categorical features the autoencoder failed to reconstruct, indicating they deviate from the learned normal pattern.
-
-4. **Natural language summary** — a paragraph-form explanation synthesising all signals into analyst-readable language, including recommended action (auto-block / step-up auth / monitor / no action).
-
-**Inference interface** (`notebooks/inference_explainability.ipynb`, `app.py`):
-- Single-log scoring: paste any raw log string and receive a full explanation and four visualisation panels
-- Batch scoring: upload a CSV or paste log lines; receive tier distribution, batch statistics, and individual drill-down for each flagged transaction
-- Top-50 anomaly visualisations: scatter plot (risk score vs amount), ranked bar chart, user risk heatmap, and global feature importance across the top-50 anomalies
-
 ---
 
 ## 6. Business Impact
-
-*Based on final_df.csv output, 7,774 transactions, June 1 – July 31 2025.*
 
 ### Detected anomalies
 
@@ -547,23 +414,19 @@ Once 500+ confirmed fraud labels exist, Platt scaling (logistic regression on mo
 
 The current feature engine requires the full user history to compute rolling features (30-day means, velocity counts, etc.). A single new transaction cannot be scored in isolation. In production, this should be replaced by a **feature store** (Redis or Feast) that maintains pre-computed user-level aggregates updated in real time. Each new transaction would fetch the stored aggregates, compute the delta features locally, and score without reprocessing history. This reduces inference latency from O(user history) to O(1).
 
-### 8.2 Graph-Based Identity Linkage
-
-The current pipeline treats each `user_id` independently. In practice, fraud rings share devices, IP addresses, and behavioural signatures across accounts. A **graph neural network** approach — where nodes are users/devices/locations and edges represent shared attributes — could identify clusters of related accounts that individually score below the threshold but collectively exhibit a ring pattern.
-
-### 8.3 Platt Scaling / Probability Calibration
+### 8.2 Platt Scaling / Probability Calibration
 
 As described in the manual validation plan, replacing score-based thresholds with calibrated probabilities makes fraud decisions interpretable and auditable for compliance. The infrastructure for this is already in place — it simply requires labelled outcomes from analyst review.
 
-### 8.4 PyTorch Autoencoder with Full Entity Embeddings
+### 8.3 PyTorch Autoencoder with Full Entity Embeddings
 
 The current deployment uses an sklearn MLP fallback. The full PyTorch autoencoder with shared entity embedding weights (user_id, city/prev_city with tied weights, device/prev_device with tied weights) captures temporal consistency in a way the MLP cannot. Installing PyTorch and retraining would improve the autoencoder's BC from the current level and reduce false negatives on account-takeover patterns.
 
-### 8.5 Drift Monitoring in Production
+### 8.4 Drift Monitoring in Production
 
 Implement automated monthly CSI reports comparing the current month's score distribution against the training baseline. CSI > 0.25 should trigger an automated alert to the ML engineering team. This converts the current manual CSI check (Cell 93–94) into a scheduled production monitoring job.
 
-### 8.6 Synthetic Data Limitations
+### 8.5 Synthetic Data Limitations
 
 This dataset was generated with a uniform amount distribution and all users visiting all cities. A production deployment would benefit from retraining on real transaction data where:
 - Amounts follow a log-normal distribution with user-specific clustering
@@ -573,5 +436,3 @@ This dataset was generated with a uniform amount distribution and all users visi
 The pipeline architecture is designed to handle this — the user-relative normalisation in the feature engine will automatically adapt to real distributions. However, rule thresholds calibrated from EDA on this dataset (e.g. the z-score cutoffs in R01, R04, R05) should be re-calibrated against real data distributions before production deployment.
 
 ---
-
-*This pipeline was developed as a take-home assignment for the Moniepoint Manager DS role, 2026.*
